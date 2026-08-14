@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Cinely"
+rootProject.name = "Orion"
 include(":app")

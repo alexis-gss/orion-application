@@ -1,0 +1,348 @@
+<resources>
+    <string name="app_name" translatable="false">Orion</string>
+
+    <string name="back">Back</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="see_all">See all</string>
+    <string name="refresh">Refresh</string>
+
+    <string name="nav_planning">Planning</string>
+    <string name="nav_bookmark">Bookmark</string>
+    <string name="nav_search">Search</string>
+    <string name="nav_account">Account</string>
+
+    <string name="filters_all">All</string>
+    <string name="filters_genre_all">All genres</string>
+    <string name="filters_sort_label">Sort by</string>
+    <string name="filters_reset">Reset filters</string>
+    <string name="filters_movie">Films</string>
+    <string name="filters_tv">Series</string>
+    <string name="sort_relevance">Relevance</string>
+    <string name="sort_rating">Top rated</string>
+    <string name="sort_recent">Most recent</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_key_title">TMDB API Key</string>
+    <string name="settings_key_not_empty">The key cannot be empty</string>
+    <string name="settings_key_already_saved">Already registered</string>
+    <string name="settings_key_saved">New key saved</string>
+    <string name="settings_key_invalid">Invalid key, old key restored</string>
+    <string name="settings_key_error">TMDB error (code %1$d)</string>
+    <string name="settings_key_unverified">Unable to verify, please check your connection</string>
+    <string name="settings_key_placeholder">TMDB API Key…</string>
+    <string name="settings_key_save">Save the key</string>
+    <string name="settings_key_details">Retrieve your TMDB key at the following address: %1$s.</string>
+    <string name="settings_key_verification">Checking…</string>
+    <string name="settings_data_title">Local Data</string>
+    <string name="settings_data_details">Export your data and viewing history to a file, or import a previous backup.</string>
+    <string name="settings_data_import">Import</string>
+    <string name="settings_data_import_success">Import successful (%1$d watched, %2$d followed, %3$d favorites)</string>
+    <string name="settings_data_import_failed">Import failed: %1$s</string>
+    <string name="settings_data_export">Export</string>
+    <string name="settings_data_export_success">Export successful (%1$d watched, %2$d followed, %3$d favorites)</string>
+    <string name="settings_data_export_failed">Export failed: %1$s</string>
+    <string name="settings_data_export_import_read_error">Unable to read the selected file</string>
+    <string name="settings_data_cache_details">Temporary images and data will be deleted. The shows and movies you\'re following and your viewing history will not be affected.</string>
+    <string name="settings_data_cache_emptied">Cache cleared</string>
+    <string name="settings_data_cache_clear">Clear</string>
+    <string name="settings_data_all_reset">Delete all data</string>
+    <string name="settings_data_all_title">Delete all data ?</string>
+    <string name="settings_data_all_details">This action is irreversible: all the movies and TV shows you\'re following, your viewing history, and your favorites will be permanently deleted.</string>
+    <string name="settings_data_all_emptied">All data has been deleted</string>
+    <string name="settings_data_all_clear">Delete</string>
+    <string name="settings_theme_title">Appearance</string>
+    <string name="settings_theme_details">Choose the theme you want to apply: switch between light and dark backgrounds.</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_notifications_title">Notifications</string>
+    <string name="settings_notifications_summary">Movies, episodes, video games, and tracked books in a daily summary.</string>
+    <string name="settings_notification_time_label">Notification time</string>
+    <string name="settings_about_title">About</string>
+    <string name="settings_about_version">%1$s - version %2$s by\u0020</string>
+
+    <string name="date_unknown">Unknown date</string>
+    <string name="date_today">Today</string>
+    <string name="date_tomorrow">Tomorrow</string>
+    <string name="date_format_same_year">%1$s %3$s %2$d</string>
+    <string name="date_format_other_year">%1$s %3$s %2$d %4$d</string>
+    <string name="days_remaining_unknown">—</string>
+    <string name="days_remaining_released">Released</string>
+    <string name="days_remaining_today">Today</string>
+    <string name="days_remaining_tomorrow">D-1</string>
+    <string name="days_remaining_days">D-%1$d</string>
+
+    <string name="films_to_watch">Films</string>
+    <string name="films_not_watched">No films to see.</string>
+    <string name="series_started_to_watch">Current series</string>
+    <string name="series_started_not_watched">No current series to see.</string>
+    <string name="series_unstarted_to_watch">Unstarted series</string>
+    <string name="series_unstarted_not_watched">No unstarted series to see.</string>
+    <string name="bookmark_not_elements">Nothing to see for now.\nEverything you follow is either to come or already seen.</string>
+
+    <string name="detail_retry">Retry</string>
+    <string name="detail_load_error">Unable to load this page.</string>
+
+    <string name="gate_logo_description">%1$s logo</string>
+    <string name="gate_subtitle">Enter your TMDB API key to continue</string>
+    <string name="gate_key_label">TMDB API Key (v3)</string>
+    <string name="gate_validate">Validate</string>
+    <string name="gate_error_empty">Enter a key before validating</string>
+    <string name="gate_error_invalid">Invalid key, check that it was copied correctly</string>
+    <string name="gate_error_tmdb">TMDB error (code %1$d), try again</string>
+    <string name="gate_error_unverified">Unable to verify the key, check your connection</string>
+
+    <string name="search_placeholder">Movie, show, manga…</string>
+    <string name="search_no_results">No results</string>
+    <string name="search_error">Search unavailable. Check your connection or your TMDB API key.</string>
+    <string name="search_clear">Clear search</string>
+    <string name="search_popular_now">Popular right now</string>
+
+    <string name="tab_details">Details</string>
+    <string name="tab_seasons">Seasons</string>
+    <string name="tab_media">Media</string>
+
+    <string name="tv_status_returning">Ongoing</string>
+    <string name="tv_status_ended">Ended</string>
+    <string name="tv_status_canceled">Canceled</string>
+    <string name="tv_status_in_production">In production</string>
+    <string name="tv_status_planned">Planned</string>
+    <string name="tv_status_pilot">Pilot</string>
+
+    <plurals name="seasons_count">
+        <item quantity="one">%1$d season</item>
+        <item quantity="other">%1$d seasons</item>
+    </plurals>
+    <plurals name="episodes_count">
+        <item quantity="one">%1$d episode</item>
+        <item quantity="other">%1$d episodes</item>
+    </plurals>
+
+    <string name="notification_channel_name">Today\'s releases</string>
+    <string name="notification_channel_description">Notifies when a followed movie, episode, video game, or book releases today.</string>
+    <string name="notification_title">Releasing today</string>
+    <string name="notification_single_item">%1$s (%2$s) is releasing today.</string>
+    <plurals name="notif_movie_count">
+        <item quantity="one">%1$d movie</item>
+        <item quantity="other">%1$d movies</item>
+    </plurals>
+    <plurals name="notif_episode_count">
+        <item quantity="one">%1$d episode</item>
+        <item quantity="other">%1$d episodes</item>
+    </plurals>
+    <plurals name="notif_game_count">
+        <item quantity="one">%1$d video game</item>
+        <item quantity="other">%1$d video games</item>
+    </plurals>
+    <plurals name="notif_book_count">
+        <item quantity="one">%1$d book</item>
+        <item quantity="other">%1$d books</item>
+    </plurals>
+
+    <string name="finance_title">Finances</string>
+    <string name="finance_budget">Budget</string>
+    <string name="finance_revenue">Revenue</string>
+    <string name="finance_profit">Profit</string>
+    <string name="finance_loss">Loss</string>
+
+    <string name="cast_title">Casting</string>
+    <string name="crew_title">Crew</string>
+    <string name="synopsis_title">Synopsis</string>
+
+    <string name="action_followed">Following</string>
+    <string name="action_follow">Follow</string>
+    <string name="action_watched">Watched</string>
+    <string name="action_not_watched">Not watched</string>
+    <string name="action_favorite">Favorite</string>
+    <string name="action_favorites">Favorites</string>
+    <string name="action_trailer_description">Trailer</string>
+    <string name="action_preview_description">Preview</string>
+
+    <string name="recommendations_title">Recommendations</string>
+    <string name="streaming_available_title">Available on</string>
+
+    <string name="seasons_none_available">No season available.</string>
+    <string name="season_watched_description">Season watched</string>
+    <string name="collapse">Collapse</string>
+    <string name="expand">Expand</string>
+    <string name="mark_season_unwatched">Mark season as unwatched</string>
+    <string name="mark_season_watched">Mark whole season as watched</string>
+    <string name="episode_default_name">Episode</string>
+    <string name="episodes_watched_count">%1$d episodes · %2$d watched</string>
+
+    <string name="media_trailers_title">Trailers &amp; videos</string>
+    <string name="media_play_description">Play</string>
+    <string name="media_banners_title">HD banners</string>
+    <string name="media_posters_title">HD posters</string>
+    <string name="media_none_available">No media available.</string>
+
+    <string name="gallery_close">Close</string>
+    <string name="gallery_previous">Previous</string>
+    <string name="gallery_next">Next</string>
+    <string name="gallery_download">Download</string>
+    <string name="gallery_download_success">Download successful</string>
+    <string name="gallery_download_error">Download failed</string>
+    <string name="gallery_download_permission_denied">Permission denied to download</string>
+
+    <string name="stats_title">Statistics</string>
+    <string name="stats_no_data">Nothing to analyze yet.\nMark a movie or episode as watched from its page.</string>
+    <string name="stats_no_movies_watched">No movies watched yet.</string>
+    <string name="stats_no_episodes_watched">No episodes watched yet.</string>
+    <string name="stats_movies_watched_total">movie(s) watched in total</string>
+    <string name="stats_episodes_watched_total">episode(s) watched in total</string>
+    <plurals name="episodes_watched_count_short">
+        <item quantity="one">%1$d episode watched</item>
+        <item quantity="other">%1$d episodes watched</item>
+    </plurals>
+    <string name="stats_this_month">This month</string>
+    <string name="stats_average_per_month">Average / month</string>
+    <string name="stats_best_month">Best month</string>
+    <string name="stats_in_brief">At a glance</string>
+    <string name="stats_favorite_genres">Favorite genres</string>
+    <string name="stats_no_genre_data">No genre data yet. It will fill in as you mark new items as watched.</string>
+    <string name="stats_watch_time_estimated">Estimated watch time</string>
+    <string name="stats_no_duration_data">No known duration yet. It will fill in as you mark new items as watched.</string>
+    <string name="stats_unknown_duration_count">Unknown duration for %1$d item(s), not counted here.</string>
+    <string name="stats_days_nonstop">about %1$d day(s) non-stop</string>
+    <string name="stats_activity_6months">Activity (last 6 months)</string>
+    <string name="stats_favorite_days">Favorite days</string>
+    <string name="stats_shows_count_short">%1$d show(s)</string>
+    <string name="stats_streak_days">%1$d day streak (record)</string>
+
+    <string name="account_stats_description">Statistics</string>
+    <string name="account_no_items">Nothing checked off yet.\nMark a movie or episode as watched from its page.</string>
+    <string name="favorites_movies_title">Favorite movies</string>
+    <string name="favorites_shows_title">Favorite series</string>
+    <string name="favorites_title">Favorites</string>
+    <string name="favorites_empty">No favorites yet.</string>
+    <string name="movies_watched_title">Watched movies</string>
+    <string name="shows_watched_title">Watched series</string>
+    <string name="shows_watched_empty">No series watched yet.</string>
+    <string name="account_episodes_label">Episodes</string>
+
+    <string name="label_movie">Movie</string>
+    <string name="label_series">Series</string>
+    <string name="movie_released_on">Movie · released %1$s</string>
+    <string name="last_episode_aired">Last episode aired: S%1$d E%2$d</string>
+    <string name="episode_remaining_singular">1 ep. remaining</string>
+    <string name="episodes_remaining_plural">%1$d ep. remaining</string>
+    <string name="planning_no_upcoming">No upcoming releases for now.\nFollow a movie or show from search.</string>
+    <string name="sort_field_rating">Note</string>
+    <string name="sort_field_release_date">Release date</string>
+    <string name="sort_field_added_date">Date added</string>
+    <string name="games_library_title">Library</string>
+    <string name="games_library_empty">No released followed game yet.
+Follow games from search.</string>
+    <string name="games_search_error">Couldn’t load results. Check your connection and IGDB credentials.</string>
+    <string name="games_search_placeholder">Search for a game…</string>
+    <string name="games_favorites_empty">No favorites yet.</string>
+    <string name="games_completed_empty">No completed game yet.</string>
+    <string name="games_completed_title">Completed</string>
+    <string name="games_planning_empty">No upcoming game release yet.
+Follow games from search.</string>
+    <string name="games_stats_empty">No stats yet.
+Complete games to see your stats appear.</string>
+    <string name="games_stats_total_completed">games completed in total</string>
+    <string name="games_streak_days">%1$d-day streak</string>
+    <string name="games_stats_no_genre_data">Not enough genre data yet.</string>
+    <string name="game_status_upcoming">Upcoming</string>
+    <string name="game_status_playing">Playing</string>
+    <string name="game_status_completed">Completed</string>
+    <string name="game_status_dropped">Dropped</string>
+    <string name="game_status_backlog">Backlog</string>
+    <string name="game_hours_played_short">%1$dh</string>
+    <string name="game_platforms_title">Platforms</string>
+    <string name="game_info_title">Info</string>
+    <string name="game_publisher_label">Publisher</string>
+    <string name="game_engine_label">Engine</string>
+    <string name="game_screenshots_title">Screenshots</string>
+    <string name="game_time_to_beat_title">Time to beat</string>
+    <string name="game_time_to_beat_fast">Fast</string>
+    <string name="game_time_to_beat_normal">Normal</string>
+    <string name="game_time_to_beat_complete">Complete</string>
+    <string name="game_related_content_title">Related content</string>
+    <string name="game_franchise_tab">Same franchise</string>
+    <string name="game_franchise_empty">No other game found for this franchise.</string>
+    <string name="game_related_content_none">No related content available.</string>
+    <string name="game_expansions_title">Expansions</string>
+    <string name="game_remasters_title">Remasters</string>
+    <string name="game_remakes_title">Remakes</string>
+    <string name="game_addons_title">Packs / Addons</string>
+    <string name="game_dlc_title">DLC</string>
+    <string name="game_bundled_in_title">Bundled in</string>
+    <string name="game_editions_title">Editions</string>
+    <string name="game_similar_title">Similar games</string>
+    <string name="game_gate_title">Video games</string>
+    <string name="game_gate_subtitle">Sign in to IGDB (via a free Twitch application) to follow your games.</string>
+    <string name="game_gate_client_id_label">Twitch Client ID</string>
+    <string name="game_gate_client_secret_label">Twitch Client Secret</string>
+    <string name="game_gate_error_empty">Enter the Client ID and the Client Secret.</string>
+    <string name="game_gate_error_connection">Couldn’t connect to IGDB: %1$s</string>
+    <string name="book_gate_title">Books</string>
+    <string name="book_gate_subtitle">Generate a free personal token at hardcover.app/account/api, then paste it below.</string>
+    <string name="book_gate_key_label">Hardcover API token</string>
+    <string name="book_gate_error_empty">Enter a Hardcover API token.</string>
+    <string name="book_gate_error_connection">Couldn’t connect to Hardcover: %1$s</string>
+    <string name="book_gate_error_check_token">check your token</string>
+    <string name="book_series_tab">Series</string>
+    <string name="book_read_label">Read</string>
+    <string name="book_status_upcoming">Coming soon</string>
+    <string name="book_status_reading">Reading</string>
+    <string name="book_status_to_read">To read</string>
+    <string name="book_similar_title">Similar books</string>
+    <string name="book_series_volumes_title">Volumes in this series</string>
+    <string name="book_series_empty">Hardcover doesn’t reference any other volume for this series.</string>
+    <string name="book_read_title">Read</string>
+    <string name="book_read_empty">No book read yet.</string>
+    <string name="book_library_empty">No released followed book yet.
+Follow books from search.</string>
+    <string name="book_planning_empty">No upcoming release yet.
+Follow books from search.</string>
+    <string name="books_search_error">Couldn’t load results. Check your connection and your Hardcover API key.</string>
+    <string name="books_search_placeholder">Search for a book…</string>
+    <string name="books_stats_empty">No stats yet.
+Finish books to see your stats appear.</string>
+    <string name="books_stats_total_read">books read in total</string>
+    <string name="books_stats_pages_read">Pages read</string>
+    <string name="books_favorite_categories">Favorite categories</string>
+    <string name="books_stats_no_category_data">Not enough category data yet.</string>
+    <string name="settings_dark_theme_label">Dark theme</string>
+    <string name="settings_tmdb_section_title">API Key (TMDB)</string>
+    <string name="settings_igdb_section_title">API Keys (IGDB)</string>
+    <string name="settings_books_section_title">API Key (Hardcover)</string>
+    <string name="settings_cinema_data_section_title">Local data</string>
+    <string name="settings_games_data_section_title">Local data</string>
+    <string name="settings_books_data_section_title">Local data</string>
+    <string name="settings_about_prefix">Orion %1$s — by </string>
+    <string name="settings_hint">Get a free key at %1$s</string>
+    <string name="settings_books_hint">Get a free key at %1$s (enable the “Books API”)</string>
+    <string name="settings_igdb_hint">Credentials from a (free) Twitch application: dev.twitch.tv/console/apps</string>
+    <string name="settings_credentials_saved">Credentials saved.</string>
+    <string name="settings_save">Save</string>
+    <string name="settings_disconnect">Disconnect</string>
+    <string name="settings_delete_all_cinema_button">Delete all movies &amp; TV data</string>
+    <string name="settings_delete_all_cinema_text">Followed items, favorites, and viewing history will be permanently deleted.</string>
+    <string name="settings_cinema_data_cleared">Movies &amp; TV data deleted.</string>
+    <string name="settings_delete_all_games_button">Delete all video game data</string>
+    <string name="settings_delete_all_games_text">Followed items, favorites, and completed games will be permanently deleted.</string>
+    <string name="settings_games_data_cleared">Video game data deleted.</string>
+    <string name="settings_delete_all_books_button">Delete all book data</string>
+    <string name="settings_delete_all_books_text">Followed items, favorites, and read books will be permanently deleted.</string>
+    <string name="settings_books_data_cleared">Book data deleted.</string>
+    <string name="settings_games_export_success">Export successful (%1$d completed, %2$d followed, %3$d favorites)</string>
+    <string name="settings_games_import_success">Import successful (%1$d completed, %2$d followed, %3$d favorites)</string>
+    <string name="settings_books_export_success">Export successful (%1$d read, %2$d followed, %3$d favorites)</string>
+    <string name="settings_books_import_success">Import successful (%1$d read, %2$d followed, %3$d favorites)</string>
+    <string name="delete_action">Delete</string>
+    <string name="domain_cinema">Cinema</string>
+    <string name="domain_games">Video games</string>
+    <string name="domain_books">Books</string>
+    <string name="home_tagline">Your universe, all in one place</string>
+    <string name="home_cinema_subtitle">Movies, TV shows, animes…</string>
+    <string name="home_games_subtitle">Adventure, action, RPG…</string>
+    <string name="home_books_subtitle">Comics, mangas, novels…</string>
+    <string name="top_bar_menu_description">Menu</string>
+    <string name="top_bar_home_description">Back to home</string>
+    <string name="book_pages_label">Pages</string>
+    <string name="book_language_label">Language</string>
+</resources>

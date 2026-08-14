@@ -1,16 +1,16 @@
 <div align="center">
 
-[![Banner of the github account](./assets/images/github-visual.png)](https://cinely.alexis-gousseau.com/)
+[![Banner of the github account](./assets/images/github-visual.png)](https://orion.alexis-gousseau.com/)
 
-[![Website test](https://img.shields.io/website-up-down-green-red/https/cinely.alexis-gousseau.com?style=for-the-badge)](https://cinely.alexis-gousseau.com)
-[![GitHub latest commit](https://img.shields.io/github/last-commit/alexis-gss/cinely-application/develop?color=5A718A&style=for-the-badge)](https://github.com/alexis-gss/cinely-application/commit/master)
-[![GitHub tag](https://img.shields.io/github/tag/alexis-gss/cinely-application?style=for-the-badge&color=5A718A)](https://github.com/alexis-gss/cinely-application/tags)
-[![GitHub License](https://img.shields.io/github/license/alexis-gss/cinely-application?color=5A718A&style=for-the-badge)](https://github.com/alexis-gss/cinely-application/blob/master/LICENSE)
+[![Website test](https://img.shields.io/website-up-down-green-red/https/orion.alexis-gousseau.com?style=for-the-badge)](https://orion.alexis-gousseau.com)
+[![GitHub latest commit](https://img.shields.io/github/last-commit/alexis-gss/orion-application/develop?color=5A718A&style=for-the-badge)](https://github.com/alexis-gss/orion-application/commit/master)
+[![GitHub tag](https://img.shields.io/github/tag/alexis-gss/orion-application?style=for-the-badge&color=5A718A)](https://github.com/alexis-gss/orion-application/tags)
+[![GitHub License](https://img.shields.io/github/license/alexis-gss/orion-application?color=5A718A&style=for-the-badge)](https://github.com/alexis-gss/orion-application/blob/master/LICENSE)
 
 </div>
 
 # Introduction
-[Cinely](http://cinely.alexis-gousseau.com/) is a native Android app (Kotlin + Jetpack Compose) that lets you track movies, TV shows, documentaries, and manga/anime (in video format) via the TMDB API.
+[Orion](http://orion.alexis-gousseau.com/) is a native Android app (Kotlin + Jetpack Compose) that lets you track movies, TV shows, documentaries, and manga/anime (in video format) via the TMDB API.
 
 All tracking data is stored and optimized locally on the device and can be exported or imported as a compressed file.
 
@@ -37,13 +37,13 @@ All tracking data is stored and optimized locally on the device and can be expor
 
 # Documentation
 
-You can find all the documentation of this project on this link : [Cinely documentation](https://doc-cinely.alexis-gousseau.com).
+You can find all the documentation of this project on this link : [Orion documentation](https://doc-orion.alexis-gousseau.com).
 
 # Contributing
 
 ### Create a task
 
-You can create a [new issue](https://github.com/alexis-gss/cinely-application/issues/new/choose) with a specific templates : bug or feature.
+You can create a [new issue](https://github.com/alexis-gss/orion-application/issues/new/choose) with a specific templates : bug or feature.
 
 ### Fixing a Bug
 
@@ -55,12 +55,12 @@ When implementing a feature please create an issue first explaining your idea an
 
 # Changelog
 
-Latest version [v1.0.0](https://github.com/alexis-gss/cinely-application/releases/tag/v1.0.0).
+Latest version [v1.0.0](https://github.com/alexis-gss/orion-application/releases/tag/v1.0.0).
 
 See the [CHANGELOG.md](CHANGELOG.md) file for details.
 
 # Copyright and License
 
-[Cinely](http://cinely.alexis-gousseau.com/) was written by [Alexis Gousseau](https://github.com/alexis-gss).
+[Orion](http://orion.alexis-gousseau.com/) was written by [Alexis Gousseau](https://github.com/alexis-gss).
 
 Copyright (c) 2026 and beyond Alexis Gousseau.
