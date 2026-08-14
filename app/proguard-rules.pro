@@ -1,3 +1,3 @@
 -keepattributes Signature
 -keepattributes *Annotation*
--keep class com.cinely.app.data.** { *; }
+-keep class com.orion.app.data.** { *; }

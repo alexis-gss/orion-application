@@ -13,5 +13,5 @@ jobs:
     name: Validation android
     uses: alexis-gss/github-workflows/.github/workflows/release-apk.yml@master
     with:
-      app_name: cinely
+      app_name: orion
     secrets: inherit
