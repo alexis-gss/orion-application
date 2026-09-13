@@ -6,6 +6,10 @@ All notable changes to `orion` will be documented in this file.
 - This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html),
 - Commits respect [Conventionnal commits](https://www.conventionalcommits.org/en/v1.0.0/) & use [Gitmoji](https://gitmoji.dev/).
 
+## **[v2.0.0] - 13.09.26**
+
+- feat: ✨ add games and books domains
+
 ## **[v1.0.0] - 04.08.26**
 
 - feat: 🎉 working project
