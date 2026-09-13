@@ -1,16 +1,16 @@
 <div align="center">
 
-[![Banner of the github account](./assets/images/github-visual.png)](https://orion.alexis-gousseau.com/)
+[![Banner of the github account](./assets/images/github-visual.jpg)](https://orion.alexis-gousseau.com/)
 
 [![Website test](https://img.shields.io/website-up-down-green-red/https/orion.alexis-gousseau.com?style=for-the-badge)](https://orion.alexis-gousseau.com)
-[![GitHub latest commit](https://img.shields.io/github/last-commit/alexis-gss/orion-application/develop?color=5A718A&style=for-the-badge)](https://github.com/alexis-gss/orion-application/commit/master)
-[![GitHub tag](https://img.shields.io/github/tag/alexis-gss/orion-application?style=for-the-badge&color=5A718A)](https://github.com/alexis-gss/orion-application/tags)
-[![GitHub License](https://img.shields.io/github/license/alexis-gss/orion-application?color=5A718A&style=for-the-badge)](https://github.com/alexis-gss/orion-application/blob/master/LICENSE)
+[![GitHub latest commit](https://img.shields.io/github/last-commit/alexis-gss/orion-application/develop?color=f6f5f0&style=for-the-badge)](https://github.com/alexis-gss/orion-application/commit/master)
+[![GitHub tag](https://img.shields.io/github/tag/alexis-gss/orion-application?style=for-the-badge&color=f6f5f0)](https://github.com/alexis-gss/orion-application/tags)
+[![GitHub License](https://img.shields.io/github/license/alexis-gss/orion-application?color=f6f5f0&style=for-the-badge)](https://github.com/alexis-gss/orion-application/blob/master/LICENSE)
 
 </div>
 
 # Introduction
-[Orion](http://orion.alexis-gousseau.com/) is a native Android app (Kotlin + Jetpack Compose) that lets you track movies, TV shows, documentaries, and manga/anime (in video format) via the TMDB API.
+[Orion](http://orion.alexis-gousseau.com/) is a native Android app (Kotlin + Jetpack Compose) that lets you track movies, TV shows, video games, and books via multiples APIs.
 
 All tracking data is stored and optimized locally on the device and can be exported or imported as a compressed file.
 
@@ -28,12 +28,10 @@ All tracking data is stored and optimized locally on the device and can be expor
 - [Copyright and License](#copyright-and-license)
 
 # Frameworks, Platforms and Libraries
-[![SASS](https://img.shields.io/badge/SASS-hotpink.svg?style=for-the-badge&logo=SASS&logoColor=white)](https://sass-lang.com/)
-[![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vue.js](https://img.shields.io/badge/vuejs-%2335495e.svg?style=for-the-badge&logo=vuedotjs&logoColor=%234FC08D)](https://vuejs.org/)
-[![Bootstrap](https://img.shields.io/badge/bootstrap-%23563D7C.svg?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
-[![PHP](https://img.shields.io/badge/php-%23777BB4.svg?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net/)
-[![Laravel](https://img.shields.io/badge/laravel-%23FF2D20.svg?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com/docs/master)
+[![Android Studio](https://img.shields.io/badge/Android%20Studio-%233DDC84.svg?style=for-the-badge&logo=android-studio&logoColor=white)](https://developer.android.com/studio)
+[![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![Gradle](https://img.shields.io/badge/Gradle-%2302303A.svg?style=for-the-badge&logo=Gradle&logoColor=white)](https://gradle.org/)
+[![Material 3](https://img.shields.io/badge/Material%203-6750A4.svg?style=for-the-badge&logo=android&logoColor=white)](https://m3.material.io/)
 
 # Documentation
 
@@ -55,7 +53,7 @@ When implementing a feature please create an issue first explaining your idea an
 
 # Changelog
 
-Latest version [v1.0.0](https://github.com/alexis-gss/orion-application/releases/tag/v1.0.0).
+Latest version [v2.0.0](https://github.com/alexis-gss/orion-application/releases/tag/v2.0.0).
 
 See the [CHANGELOG.md](CHANGELOG.md) file for details.
 
