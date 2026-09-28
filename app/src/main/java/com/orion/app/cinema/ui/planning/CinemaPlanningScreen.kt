@@ -49,10 +49,6 @@ fun CinemaPlanningScreen(repository: CinemaRepository, onOpenItem: (String, Int)
     val scope = rememberCoroutineScope()
     var isRefreshing by remember { mutableStateOf(false) }
 
-    // Planning only makes sense for things with a known, not-yet-past release date: an
-    // "Ended" show or a "Returning Series" with no next episode announced has
-    // nextAirDate == null and must therefore not appear here (it lands in Bookmark once
-    // released, if not yet watched).
     val followed = remember(allFollowed) {
         allFollowed
             .map { it.copy(nextAirDate = it.nextAirDate?.takeIf { d -> d.isNotBlank() }) }
@@ -68,9 +64,6 @@ fun CinemaPlanningScreen(repository: CinemaRepository, onOpenItem: (String, Int)
             .sortedWith(compareBy({ it.nextAirDate == null }, { it.nextAirDate }))
     }
 
-    // "Just in case" refresh when the screen opens: throttled on the Repository side
-    // (6h normally, 30min if nextAirDate is still unknown for an ongoing show), so this
-    // doesn't systematically trigger a network call.
     LaunchedEffect(allFollowed.map { it.tmdbId }) {
         allFollowed.filter { it.mediaType == "tv" }.forEach { item ->
             repository.refreshFollowedIfStale(item)
@@ -122,9 +115,6 @@ fun CinemaPlanningScreen(repository: CinemaRepository, onOpenItem: (String, Int)
                     )
                 }
             } else {
-                // Grouped by release date while keeping the order already sorted by the DAO
-                // (nextAirDate IS NULL then ASC), to show a single "Friday, August 14" header
-                // above every release on that day.
                 val groups: List<Pair<String?, List<FollowedItem>>> = remember(followed) {
                     val result = mutableListOf<Pair<String?, MutableList<FollowedItem>>>()
                     followed.forEach { item ->

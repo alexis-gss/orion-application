@@ -31,9 +31,6 @@ fun FollowedBook.toCardData(context: Context): BookCardData = BookCardData(
     coverUrl = coverUrl,
     subtitle = releaseLabel ?: releaseTimestamp?.toReadableDate(),
     trailingText = if (isReleased) null else context.getString(R.string.book_status_upcoming),
-    // Same convention as ReadBook.toCardData: the generic segment (before " / ") of each
-    // CSV category, deduplicated — without this, BooksLibraryScreen's genre picker stayed
-    // empty even though followed books did have known categories.
     genres = categories?.split(",")
         ?.map { it.trim().substringBefore(" / ") }
         ?.filter { it.isNotBlank() }
@@ -48,11 +45,7 @@ fun ReadBook.toCardData(context: Context): BookCardData = BookCardData(
     title = title,
     coverUrl = coverUrl,
     subtitle = statusLabel(context, status),
-    // Date the book was marked "read" (last status change), more useful here than the
-    // page count, which adds nothing once the book has already been read.
     trailingText = updatedAt.toReadableDateFromMillis(),
-    // Same convention as BooksStatsScreen.BooksCategoryBreakdownCard: the generic segment
-    // (before " / ") of each CSV category, deduplicated.
     genres = categories?.split(",")
         ?.map { it.trim().substringBefore(" / ") }
         ?.filter { it.isNotBlank() }

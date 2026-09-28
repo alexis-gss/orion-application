@@ -42,9 +42,9 @@ import com.orion.app.core.ui.theme.OrionColors
 fun AppSidebarContent(
     currentUniverse: AppUniverse,
     onSelectUniverse: (AppUniverse) -> Unit,
-    onOpenOptions: () -> Unit
+    onOpenOptions: () -> Unit,
+    onGoHome: (() -> Unit)? = null
 ) {
-    val extended = OrionColors.colors
     ModalDrawerSheet {
         Column(
             Modifier
@@ -52,16 +52,16 @@ fun AppSidebarContent(
                 .padding(top = 16.dp)
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .let { if (onGoHome != null) it.clip(RoundedCornerShape(12.dp)).clickable(onClick = onGoHome) else it }
+                    .then(if (onGoHome != null) Modifier.padding(4.dp) else Modifier),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier.size(32.dp).clip(RoundedCornerShape(10.dp)).background(extended.chipSurface),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(painter = painterResource(R.drawable.logo), contentDescription = null, modifier = Modifier.size(20.dp))
-                }
-                Spacer(Modifier.width(10.dp))
+                Image(painter = painterResource(R.drawable.logo), contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(8.dp))
                 Text("Orion", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
             }
             Spacer(Modifier.height(16.dp))
@@ -87,7 +87,7 @@ fun AppSidebarContent(
 
             Spacer(Modifier.weight(1f))
             HorizontalDivider(modifier = Modifier.padding(horizontal = 12.dp))
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(16.dp))
             SidebarSettingsItem(
                 title = stringResource(R.string.settings_title),
                 onClick = onOpenOptions,

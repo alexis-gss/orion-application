@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import com.orion.app.core.data.createEncryptedPrefs
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -18,7 +21,10 @@ import java.util.concurrent.TimeUnit
  * avoidable synchronous auth round trip.
  */
 class IgdbTokenStore private constructor(context: Context) {
-    private val prefs: SharedPreferences = createEncryptedPrefs(context.applicationContext)
+    private val prefs: SharedPreferences = createEncryptedPrefs(context.applicationContext, PREFS_NAME)
+
+    /** Serializes token renewals so concurrent requests don't each hit Twitch. */
+    private val refreshMutex = Mutex()
 
     private val authApi: IgdbAuthApi by lazy {
         val client = OkHttpClient.Builder()
@@ -63,10 +69,21 @@ class IgdbTokenStore private constructor(context: Context) {
     }
 
     /** Returns a valid token, renewing it if needed. */
-    suspend fun getValidToken(clientId: String, clientSecret: String): String {
-        if (isTokenValid()) return getCachedToken()!!
-        return refreshToken(clientId, clientSecret)
-    }
+    suspend fun getValidToken(clientId: String, clientSecret: String): String =
+        refreshMutex.withLock {
+            if (isTokenValid()) getCachedToken()!! else refreshToken(clientId, clientSecret)
+        }
+
+    /**
+     * Called after a 401: renews the token unless another request already did so while we were
+     * waiting (i.e. the cached token is no longer the one that was rejected).
+     */
+    suspend fun refreshTokenIfRejected(clientId: String, clientSecret: String, rejectedToken: String): String =
+        refreshMutex.withLock {
+            val cached = getCachedToken()
+            if (cached != null && cached != rejectedToken && isTokenValid()) cached
+            else refreshToken(clientId, clientSecret)
+        }
 
     /** Wipes the cached token, forcing the next call to fetch a fresh one. */
     fun clear() {
@@ -85,19 +102,5 @@ class IgdbTokenStore private constructor(context: Context) {
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: IgdbTokenStore(context.applicationContext).also { INSTANCE = it }
             }
-
-        /** Builds the encrypted (AES256-GCM/SIV) SharedPreferences backing this store. */
-        private fun createEncryptedPrefs(context: Context): SharedPreferences {
-            val masterKey = MasterKey.Builder(context)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
-            return EncryptedSharedPreferences.create(
-                context,
-                PREFS_NAME,
-                masterKey,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
-        }
     }
 }

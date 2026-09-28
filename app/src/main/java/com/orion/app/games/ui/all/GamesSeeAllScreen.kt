@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,12 +13,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.orion.app.R
+import com.orion.app.core.util.sortWithUnknownLast
 import com.orion.app.core.ui.components.AdvancedFilterBar
 import com.orion.app.core.ui.components.SortDirection
 import com.orion.app.core.ui.components.SortField
@@ -50,7 +53,7 @@ fun GamesSeeAllScreen(
             .toList()
     }
     var selectedGenre by remember { mutableStateOf<String?>(null) }
-    var sortField by remember { mutableStateOf<SortField?>(null) }
+    var sortField by remember { mutableStateOf<SortField?>(SortField.ADDED_DATE) }
     var sortDirection by remember { mutableStateOf(SortDirection.DESC) }
 
     val filteredItems: List<GameCardData> = remember(allItems, selectedGenre, sortField, sortDirection) {
@@ -61,12 +64,13 @@ fun GamesSeeAllScreen(
                 item.genres?.split(",")?.map(String::trim)?.contains(selectedGenre) == true
             }
         }
+        val descending = sortDirection == SortDirection.DESC
         when (sortField) {
             null -> filtered
-            SortField.RATING -> filtered.sortedWith(compareBy(nullsFirst()) { it.rating })
-            SortField.RELEASE_DATE -> filtered.sortedWith(compareBy(nullsFirst()) { it.releaseDate })
-            SortField.ADDED_DATE -> filtered.sortedWith(compareBy(nullsFirst()) { it.addedAt })
-        }.let { sorted -> if (sortDirection == SortDirection.DESC) sorted.reversed() else sorted }
+            SortField.RATING -> sortWithUnknownLast(filtered, descending, { it.title }) { it.rating }
+            SortField.RELEASE_DATE -> sortWithUnknownLast(filtered, descending, { it.title }) { it.releaseDate }
+            SortField.ADDED_DATE -> sortWithUnknownLast(filtered, descending, { it.title }) { it.addedAt }
+        }
     }
 
     var loadedCount by remember(filteredItems) { mutableIntStateOf(minOf(PAGE_SIZE, filteredItems.size)) }
@@ -93,7 +97,8 @@ fun GamesSeeAllScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
         }
     ) { padding ->
@@ -143,9 +148,6 @@ fun GamesSeeAllScreen(
                             contentDescription = item.title,
                             modifier = Modifier.fillMaxSize()
                         )
-                        // "Completed"/"favorite" date badge: already computed upstream by
-                        // GamesAccountScreen (this screen's only caller), carried via
-                        // item.trailingText — see GameCardMappers.toCardData(showXBadge).
                         item.trailingText?.let { text ->
                             Box(
                                 modifier = Modifier
@@ -168,7 +170,7 @@ fun GamesSeeAllScreen(
                     }
                 }
                 if (loadedCount < filteredItems.size) {
-                    item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                         }

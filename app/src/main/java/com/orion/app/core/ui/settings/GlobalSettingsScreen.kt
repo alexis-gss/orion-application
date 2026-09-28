@@ -2,10 +2,8 @@ package com.orion.app.core.ui.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -17,10 +15,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
@@ -30,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.orion.app.R
 import com.orion.app.books.data.BooksRepository
@@ -55,7 +57,7 @@ import com.orion.app.games.data.GamesRepository
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GlobalSettingsScreen(
-    initialUniverse: AppUniverse = AppUniverse.CINEMA,
+    initialUniverse: AppUniverse? = null,
     themeStore: ThemePreferenceStore,
     repository: CinemaRepository,
     apiKeyStore: ApiKeyStore,
@@ -64,7 +66,7 @@ fun GlobalSettingsScreen(
     booksRepository: BooksRepository,
     booksApiKeyStore: BooksApiKeyStore,
     notificationPreferenceStore: NotificationPreferenceStore,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     var snackbarMessage by remember { mutableStateOf<String?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -73,10 +75,8 @@ fun GlobalSettingsScreen(
         snackbarMessage?.let { snackbarHostState.showSnackbar(it); snackbarMessage = null }
     }
 
-    // Pills rather than a classic TabRow (the underline indicator would be too subtle for
-    // only 4 short tabs) — same visual language as the filter chips used elsewhere in the app,
-    // with one icon per domain so the active tab is recognizable at a glance.
     val settingsTabs = listOf(
+        stringResource(R.string.settings_general_tab),
         stringResource(R.string.domain_cinema),
         stringResource(R.string.domain_games),
         stringResource(R.string.domain_books),
@@ -84,9 +84,10 @@ fun GlobalSettingsScreen(
     var selectedTabIndex by remember {
         mutableIntStateOf(
             when (initialUniverse) {
-                AppUniverse.CINEMA -> 0
-                AppUniverse.GAMES -> 1
-                AppUniverse.BOOKS -> 2
+                null -> 0
+                AppUniverse.CINEMA -> 1
+                AppUniverse.GAMES -> 2
+                AppUniverse.BOOKS -> 3
             }
         )
     }
@@ -101,17 +102,13 @@ fun GlobalSettingsScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
-                modifier = Modifier.background(MaterialTheme.colorScheme.background)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
+                modifier = Modifier.background(Color.White)
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            GlobalOptions(
-                themeStore = themeStore,
-                notificationPreferenceStore = notificationPreferenceStore,
-            )
-            Spacer(Modifier.height(16.dp))
             TabRow(
                 selectedTabIndex = selectedTabIndex,
                 modifier = Modifier.fillMaxWidth()
@@ -120,24 +117,35 @@ fun GlobalSettingsScreen(
                     Tab(
                         selected = selectedTabIndex == index,
                         onClick = { selectedTabIndex = index },
-                        text = { Text(text = tabLabel) }
-                    )
+                    ) {
+                        Text(
+                            text = tabLabel,
+                            style = MaterialTheme.typography.labelLarge,
+                            maxLines = 1,
+                            softWrap = false,
+                            modifier = Modifier.padding(vertical = 12.dp, horizontal = 4.dp)
+                        )
+                    }
                 }
             }
 
             LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
                 when (selectedTabIndex) {
-                    0 -> cinemaSettingsTab(
+                    0 -> globalOptionsTab(
+                        themeStore = themeStore,
+                        notificationPreferenceStore = notificationPreferenceStore,
+                    )
+                    1 -> cinemaSettingsTab(
                         repository = repository,
                         apiKeyStore = apiKeyStore,
                         onMessage = { snackbarMessage = it },
                     )
-                    1 -> gamesSettingsTab(
+                    2 -> gamesSettingsTab(
                         repository = gamesRepository,
                         credentialsStore = igdbCredentialsStore,
                         onMessage = { snackbarMessage = it },
                     )
-                    2 -> booksSettingsTab(
+                    3 -> booksSettingsTab(
                         repository = booksRepository,
                         apiKeyStore = booksApiKeyStore,
                         onMessage = { snackbarMessage = it },

@@ -57,11 +57,11 @@ fun FloatingTopBar(
         }
     }
     val barBackgroundColor by animateColorAsState(
-        targetValue = if (showTitleInBar) MaterialTheme.colorScheme.surface else Color.Transparent,
+        targetValue = if (showTitleInBar) Color.White else Color.Transparent,
         label = "barBackground"
     )
     val barContentColor by animateColorAsState(
-        targetValue = if (showTitleInBar) MaterialTheme.colorScheme.onSurface else Color.White,
+        targetValue = if (showTitleInBar) Color.Black else Color.White,
         label = "barContent"
     )
 

@@ -142,6 +142,7 @@ private fun SeasonCard(
                     contentDescription = season.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.size(width = 52.dp, height = 78.dp),
+                    fallback = { com.orion.app.cinema.ui.components.CinemaPosterPlaceholder() },
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
@@ -177,7 +178,7 @@ private fun SeasonCard(
                     HorizontalDivider(
                         color = MaterialTheme.colorScheme.outlineVariant
                     )
-                    Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
+                    Column(modifier = Modifier.padding(0.dp)) {
                         if (isLoading) {
                             Row(
                                 modifier = Modifier
@@ -223,7 +224,6 @@ private fun SeasonCard(
                                 )
                             }
                             if (episodes.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(4.dp))
                                 TextButton(
                                     onClick = {
                                         scope.launch {
@@ -235,7 +235,7 @@ private fun SeasonCard(
                                             }
                                         }
                                     },
-                                    modifier = Modifier.align(Alignment.End),
+                                    modifier = Modifier.align(Alignment.End).padding(8.dp),
                                 ) {
                                     Text(if (allWatched) stringResource(R.string.mark_season_unwatched) else stringResource(R.string.mark_season_watched))
                                 }
@@ -259,7 +259,7 @@ private fun EpisodeRow(
         modifier = Modifier
             .fillMaxWidth()
             .let { if (isWatchable) it.clickable { onToggleWatched() } else it }
-            .padding(vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {

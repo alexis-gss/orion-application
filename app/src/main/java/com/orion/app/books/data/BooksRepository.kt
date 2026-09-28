@@ -1,5 +1,6 @@
 package com.orion.app.books.data
 
+import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 import java.io.IOException
@@ -30,7 +31,7 @@ private const val BOOK_FIELDS = """
     contributions { author { id name } }
     book_series { position compilation series { id name books_count } }
     editions(where: {language: {code2: {_eq: "fr"}}}, order_by: {release_date: asc}, limit: 1) {
-        release_date release_year pages title subtitle
+        release_date release_year pages title subtitle isbn_13 isbn_10
         image { url }
     }
 """
@@ -85,7 +86,9 @@ private fun List<HardcoverBook>.preferFrenchDuplicates(): List<HardcoverBook> {
  */
 class BooksRepository(
     private val api: HardcoverApi,
-    private val db: BooksDatabase
+    private val db: BooksDatabase,
+    // Optional so existing call sites/tests keep compiling; null = Hardcover data only.
+    private val frenchReleaseResolver: FrenchReleaseResolver? = null,
 ) {
     /** Runs a raw GraphQL query against Hardcover, turning API-level errors (incl. 401) into [IOException]. */
     private suspend fun runQuery(query: String): HardcoverData {
@@ -220,10 +223,58 @@ class BooksRepository(
         return try {
             val raw = fetchRawById(id) ?: return null
             val resolved = raw.canonicalId?.let { fetchRawById(it) } ?: raw
-            resolved.toHardcoverBook()
+            resolved.toHardcoverBook().withFrenchRelease(resolved.id)
         } catch (e: Exception) {
             null
         }
+    }
+
+    // ----- French release-date enrichment -----
+    // Hardcover is English-centric: a French edition is frequently missing, or present
+    // without release_date. This step runs ONLY on the detail path (and therefore on the
+    // followed-item refresh, which goes through getBookDetail) — never on lists/search —
+    // to keep the number of extra calls tiny.
+    //   1. find the French ISBN (Hardcover edition tagged fr, OR an ISBN in the French
+    //      ranges 978-2 / 979-10 / 979-11, which catches editions with no language set);
+    //   2. keep Hardcover's own French date when it has one;
+    //   3. otherwise ask the external resolver (exact day, else year-only).
+    private suspend fun HardcoverBook.withFrenchRelease(bookId: Int): HardcoverBook {
+        if (frenchReleaseTimestamp != null) return this
+        val resolver = frenchReleaseResolver ?: return this
+
+        val isbn = isbn13 ?: findFrenchIsbn(bookId) ?: return this
+        val found = resolver.resolve(isbn) ?: return copy(isbn13 = isbn, hasFrenchEdition = true)
+        return copy(
+            isbn13 = isbn,
+            hasFrenchEdition = true,
+            frenchReleaseTimestamp = found.epochSeconds,
+            frenchReleaseYear = found.year,
+            // Keep the generic "published" date in sync only when we learned an exact day.
+            publishedTimestamp = found.epochSeconds ?: publishedTimestamp,
+        )
+    }
+
+    /** ISBN-13 of the earliest-known French edition of [bookId], or null. Never throws. */
+    private suspend fun findFrenchIsbn(bookId: Int): String? = try {
+        val data = runQuery(
+            """query {
+                editions(
+                    where: {book: {id: {_eq: $bookId}}, isbn_13: {_is_null: false}},
+                    order_by: {release_date: asc},
+                    limit: 100
+                ) { isbn_13 release_date language { code2 } }
+            }"""
+        )
+        data.editions.orEmpty()
+            .mapNotNull { e -> e.isbn13?.takeIf { it.isFrenchIsbn() || e.language?.code2 == "fr" } }
+            .firstOrNull()
+    } catch (e: Exception) {
+        null
+    }
+
+    private fun String.isFrenchIsbn(): Boolean {
+        val d = filter { it.isDigit() }
+        return d.length == 13 && (d.startsWith("9782") || d.startsWith("97910") || d.startsWith("97911"))
     }
 
     /** Low-level fetch of one book's raw GraphQL payload by numeric id. */
@@ -236,9 +287,12 @@ class BooksRepository(
     // Now filters on the viewed book's primary genre rather than its author (the previous
     // behavior listed "other books by the same author", not similar books). Hardcover doesn't
     // expose cached_tags as a server-filterable field (free-form jsonb, structure not
-    // guaranteed by the formal schema — see extractGenres): a pool of popular titles is
-    // fetched instead and filtered client-side on the primary genre, the only reliable
-    // approach here. Result capped at 10, as requested.
+    // guaranteed by the formal schema — see extractGenres): a pool of titles is fetched
+    // instead and filtered client-side on the primary genre, the only reliable approach here.
+    // Ordered by rating rather than users_count (recent popularity, i.e. "what's trending
+    // right now"): rating is an intrinsic, stable quality signal, so the same book gets the
+    // same recommendations today and next month, rather than a list that drifts with the
+    // site's current trending chart. Result capped at 15, as requested.
     suspend fun getSimilarBooks(book: HardcoverBook): List<HardcoverBook> {
         val genre = book.primaryCategory ?: return emptyList()
         val bookId = book.id.toIntOrNull() ?: return emptyList()
@@ -249,8 +303,9 @@ class BooksRepository(
                         where: {
                             id: {_neq: $bookId}
                             canonical_id: {_is_null: true}
+                            rating: {_is_null: false}
                         }
-                        order_by: {users_count: desc}
+                        order_by: {rating: desc}
                         limit: 200
                     ) { $BOOK_FIELDS }
                 }"""
@@ -261,7 +316,7 @@ class BooksRepository(
                 .filter { it.primaryCategory == genre }
                 .distinctBy { it.id }
                 .preferFrenchDuplicates()
-                .take(10)
+                .take(15)
         } catch (e: Exception) {
             emptyList()
         }
@@ -355,6 +410,7 @@ class BooksRepository(
                 // stays null — the book then shows up in Planning without a precise date
                 // rather than with a misleading foreign date.
                 releaseTimestamp = detail.frenchReleaseTimestamp,
+                releaseLabel = detail.frenchReleaseLabel,
                 isReleased = detail.isReleasedInFrance,
                 lastCheckedAt = now,
                 categories = detail.categories.joinToString(",").ifBlank { null }
@@ -386,10 +442,12 @@ class BooksRepository(
 
     /** Restores a previously exported snapshot, optionally wiping existing local data first. */
     suspend fun importSnapshot(bundle: BooksExportBundle, replaceExisting: Boolean) {
-        if (replaceExisting) clearAllData()
-        db.followedBookDao().upsertAll(bundle.followed)
-        db.readBookDao().insertAll(bundle.read)
-        db.favoriteBookDao().upsertAll(bundle.favorites)
+        db.withTransaction {
+            if (replaceExisting) clearAllData()
+            db.followedBookDao().upsertAll(bundle.followed)
+            db.readBookDao().insertAll(bundle.read)
+            db.favoriteBookDao().upsertAll(bundle.favorites)
+        }
     }
 
     /** Wipes all local Books data (followed, read, favorites). Irreversible. */

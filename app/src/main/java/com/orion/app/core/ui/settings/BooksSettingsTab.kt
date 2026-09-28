@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import com.orion.app.R
 import com.orion.app.books.data.BooksExportImportManager
 import com.orion.app.books.data.BooksRepository
+import com.orion.app.core.data.ApiQuotaTracker
 import com.orion.app.core.data.BooksApiKeyStore
 import com.orion.app.core.ui.components.SectionTitle
 import kotlinx.coroutines.launch
@@ -63,6 +64,8 @@ fun LazyListScope.booksSettingsTab(
     item {
         SectionTitle(stringResource(R.string.settings_books_section_title))
         HardcoverKeySection(repository = repository, apiKeyStore = apiKeyStore)
+        Spacer(Modifier.height(8.dp))
+        SettingsApiQuotaSection(domain = ApiQuotaTracker.DOMAIN_BOOKS)
 
         Spacer(Modifier.height(8.dp))
         SectionTitle(stringResource(R.string.settings_books_data_section_title))

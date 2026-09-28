@@ -38,6 +38,7 @@ import com.orion.app.core.ui.components.AppTopBar
 import com.orion.app.core.ui.components.SectionTitle
 import com.orion.app.core.ui.theme.OrionColors
 import com.orion.app.games.data.GamesRepository
+import com.orion.app.games.data.PlayedGame
 import com.orion.app.games.ui.components.GameCardData
 import com.orion.app.games.ui.components.gameCarouselSection
 import com.orion.app.games.ui.components.toCardData
@@ -56,9 +57,6 @@ fun GamesAccountScreen(
 ) {
     val context = LocalContext.current
     val favorites by repository.observeFavorites().collectAsState(initial = emptyList())
-    // showAddedDateBadge/showStatusDateBadge: the date badge (added to favorites /
-    // marked completed) only makes sense in this "account" context — see also
-    // SeeAllScreen, which receives these same cards already carrying the badge via onSeeAll.
     val favoritesCards = remember(favorites) { favorites.map { it.toCardData(context, showAddedDateBadge = true) } }
 
     val played by repository.observePlayed().collectAsState(initial = emptyList())
@@ -106,12 +104,10 @@ fun GamesAccountScreen(
     }
 }
 
-// ---------------- 3 quick stat cards (same principle as the cinema side) ----------------
-
 private data class GameStatItem(val value: Int, val label: String, val accent: Boolean = false)
 
 @Composable
-private fun GamesStatsSection(played: List<com.orion.app.games.data.PlayedGame>, favoritesCount: Int, onOpenStats: () -> Unit) {
+private fun GamesStatsSection(played: List<PlayedGame>, favoritesCount: Int, onOpenStats: () -> Unit) {
     val completedCount = remember(played) { played.count { it.status == "completed" } }
     val thisMonth = remember(played) {
         val cal = Calendar.getInstance()

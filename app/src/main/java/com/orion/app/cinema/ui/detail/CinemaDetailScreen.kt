@@ -51,7 +51,6 @@ fun CinemaDetailScreen(
 ) {
     val context = LocalContext.current
     var state by remember(mediaType, tmdbId) { mutableStateOf<DetailScreenState>(DetailScreenState.Loading) }
-    // Incremented to force a manual reload (the "Retry" button).
     var reloadKey by remember(mediaType, tmdbId) { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
 
@@ -68,8 +67,6 @@ fun CinemaDetailScreen(
         }
     }
 
-    // Followed / favorites / watched: observed live from the local database (as
-    // everywhere else in the app) so the action buttons react immediately.
     val followedList by repository.observeFollowed().collectAsState(initial = emptyList())
     val favoriteList by repository.observeFavorites().collectAsState(initial = emptyList())
     val watchedList by repository.observeWatched().collectAsState(initial = emptyList())
@@ -266,7 +263,6 @@ fun CinemaDetailScreen(
             }
         }
 
-        // Floating bar: back button + title that appears on scroll
         FloatingTopBar(
             listState = listState,
             currentTitle = currentTitle,

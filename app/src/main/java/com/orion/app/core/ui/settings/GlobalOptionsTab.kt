@@ -51,32 +51,35 @@ import com.orion.app.core.ui.components.SectionTitle
 
 /**
  * Content of the "General" settings tab: appearance (dark theme), daily release notifications,
- * and the about section. Everything is grouped into a single `item {}` (like the rest of the
- * page) rather than several `items()`, since this fixed, small number of blocks doesn't need
- * per-item recomposition/scroll optimizations.
+ * and the about section. Now a LazyListScope extension like cinemaSettingsTab/gamesSettingsTab/
+ * booksSettingsTab, so it lives in its own dedicated tab instead of always showing above the
+ * per-domain tabs. Everything is grouped into a single `item {}` (like the other tabs) rather
+ * than several `items()`, since this fixed, small number of blocks doesn't need per-item
+ * recomposition/scroll optimizations.
  */
-@Composable
-fun GlobalOptions(
+fun LazyListScope.globalOptionsTab(
     themeStore: ThemePreferenceStore,
     notificationPreferenceStore: NotificationPreferenceStore,
 ) {
-    val isDarkTheme by themeStore.isDarkTheme.collectAsState()
+    item {
+        val isDarkTheme by themeStore.isDarkTheme.collectAsState()
 
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-        SectionTitle(stringResource(R.string.settings_theme_title))
-        SettingsToggleRow(
-            title = stringResource(R.string.settings_dark_theme_label),
-            checked = isDarkTheme,
-            onCheckedChange = { themeStore.setDarkTheme(it) },
-        )
+        Column(modifier = Modifier.fillMaxWidth()) {
+            SectionTitle(stringResource(R.string.settings_theme_title))
+            SettingsToggleRow(
+                title = stringResource(R.string.settings_dark_theme_label),
+                checked = isDarkTheme,
+                onCheckedChange = { themeStore.setDarkTheme(it) },
+            )
 
-        Spacer(Modifier.height(8.dp))
-        SectionTitle(stringResource(R.string.settings_notifications_title))
-        NotificationSection(store = notificationPreferenceStore)
+            Spacer(Modifier.height(8.dp))
+            SectionTitle(stringResource(R.string.settings_notifications_title))
+            NotificationSection(store = notificationPreferenceStore)
 
-        Spacer(Modifier.height(8.dp))
-        SectionTitle(stringResource(R.string.settings_about_title))
-        AboutSection()
+            Spacer(Modifier.height(8.dp))
+            SectionTitle(stringResource(R.string.settings_about_title))
+            AboutSection()
+        }
     }
 }
 
@@ -122,11 +125,10 @@ private fun NotificationSection(store: NotificationPreferenceStore) {
     val context = LocalContext.current
     var showTimePicker by remember { mutableStateOf(false) }
 
-    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { _ ->
-        // Whether the permission is granted or not, we respect the user's choice for the
-        // setting itself: if denied, the notification simply won't be shown
-        // (see ReleaseNotificationHelper), without blocking the rest of the app.
-        store.setEnabled(true)
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        // Only enable when the permission was granted: otherwise the switch would show
+        // "on" while no notification could ever be displayed.
+        if (granted) store.setEnabled(true)
     }
 
     /** Toggles the notification preference, requesting the POST_NOTIFICATIONS runtime permission first on Android 13+ if not already granted. */

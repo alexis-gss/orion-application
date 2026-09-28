@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.orion.app.R
 import com.orion.app.core.data.IgdbCredentialsStore
 import com.orion.app.games.data.GamesRepository
+import com.orion.app.games.data.IgdbTokenStore
 import kotlinx.coroutines.launch
 
 /**
@@ -47,7 +48,7 @@ fun IgdbGateScreen(repository: GamesRepository, credentialsStore: IgdbCredential
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     val context = androidx.compose.ui.platform.LocalContext.current
-    val tokenStore = remember { com.orion.app.games.data.IgdbTokenStore.getInstance(context) }
+    val tokenStore = remember { IgdbTokenStore.getInstance(context) }
 
     fun validate() {
         if (clientId.isBlank() || clientSecret.isBlank()) {
@@ -58,10 +59,6 @@ fun IgdbGateScreen(repository: GamesRepository, credentialsStore: IgdbCredential
         isChecking = true
         scope.launch {
             try {
-                // Tested BEFORE persisting: credentialsStore.save() is only called on success.
-                // Saving before the test would recompose GamesApp to the main screen as soon
-                // as save() is called (credentials != null), so the gate screen — and its
-                // errorMessage — would disappear before testConnection() could even fail.
                 repository.testConnection(clientId.trim(), clientSecret.trim(), tokenStore)
                 credentialsStore.save(clientId, clientSecret)
             } catch (e: Exception) {

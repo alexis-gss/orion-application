@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -30,7 +31,9 @@ import com.orion.app.R
 import com.orion.app.cinema.data.CinemaRepository
 import com.orion.app.cinema.data.WatchedItem
 import com.orion.app.core.ui.components.SectionTitle
-import com.orion.app.core.ui.components.SegmentedTabs
+import com.orion.app.core.ui.components.StatBar
+import com.orion.app.core.ui.components.QuickStat
+import com.orion.app.core.ui.components.QuickStatsRow
 import com.orion.app.core.ui.theme.OrionColors
 import com.orion.app.core.ui.theme.OrionExtendedColors
 import com.orion.app.core.ui.theme.StatNumberStyle
@@ -67,10 +70,8 @@ fun CinemaStatsScreen(repository: CinemaRepository, onBack: () -> Unit) {
                             R.string.back))
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.background
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
+                modifier = Modifier.background(Color.White)
             )
         }
     ) { padding ->
@@ -92,16 +93,25 @@ fun CinemaStatsScreen(repository: CinemaRepository, onBack: () -> Unit) {
         Column(Modifier
             .padding(padding)
             .fillMaxSize()) {
-            SegmentedTabs(
-                options = listOf(0 to stringResource(R.string.filters_movie), 1 to stringResource(R.string.filters_tv)),
-                selected = selectedTab,
-                onSelect = { selectedTab = it },
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 8.dp)
-            )
+            TabRow(
+                selectedTabIndex = selectedTab,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                listOf(
+                    stringResource(R.string.filters_movie),
+                    stringResource(R.string.filters_tv)
+                ).forEachIndexed { index, tabLabel ->
+                    Tab(
+                        selected = selectedTab == index,
+                        onClick = { selectedTab = index },
+                        text = { Text(text = tabLabel) }
+                    )
+                }
+            }
             AnimatedContent(
                 targetState = selectedTab,
                 label = "stats-tab",
-                transitionSpec = { fadeIn() togetherWith fadeOut() }
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
             ) { tab ->
                 val data = if (tab == 0) movies else episodes
                 if (data.isEmpty()) {
@@ -115,7 +125,7 @@ fun CinemaStatsScreen(repository: CinemaRepository, onBack: () -> Unit) {
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 8.dp),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         item { HeroStatCard(data, isMovieTab = tab == 0) }
@@ -141,11 +151,6 @@ private fun Modifier.cardBackground(extended: OrionExtendedColors, radius: Int =
     .background(extended.cardSurface)
     .border(1.dp, extended.cardBorder, RoundedCornerShape(radius.dp))
     .padding(16.dp)
-
-// ---------------- Carte "hero" : le chiffre phare de l'onglet en avant ----------------
-// Movies -> total number of movies watched. Series -> number of episodes watched, plus the
-// number of distinct series involved and, when relevant, the record number of consecutive
-// days with at least one watch (new insight, derived from dates already stored).
 
 @Composable
 private fun HeroStatCard(items: List<WatchedItem>, isMovieTab: Boolean) {
@@ -197,7 +202,7 @@ private fun HeroStatCard(items: List<WatchedItem>, isMovieTab: Boolean) {
 }
 
 @Composable
-private fun HeroChip(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String, textColor: Color) {
+private fun HeroChip(icon: ImageVector, text: String, textColor: Color) {
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
@@ -210,12 +215,6 @@ private fun HeroChip(icon: androidx.compose.ui.graphics.vector.ImageVector, text
         Text(text, style = MaterialTheme.typography.labelSmall, color = textColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
-
-// ---------------- Grille de mini-stats rapides ----------------
-// New insights compared to the old version: monthly average and best month, in addition
-// to the "this month" counter already present on Account.
-
-private data class QuickStat(val value: String, val label: String)
 
 @Composable
 private fun QuickStatsGrid(items: List<WatchedItem>) {
@@ -248,50 +247,8 @@ private fun QuickStatsGrid(items: List<WatchedItem>) {
         QuickStat(bestMonthCount.toString(), stringResource(R.string.stats_best_month)),
     )
 
-    Column {
-        SectionTitle(stringResource(R.string.stats_in_brief))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            stats.forEach { stat ->
-                QuickStatCard(stat, modifier = Modifier.weight(1f))
-            }
-        }
-    }
+    QuickStatsRow(title = stringResource(R.string.stats_in_brief), stats = stats)
 }
-
-@Composable
-private fun QuickStatCard(stat: QuickStat, modifier: Modifier = Modifier) {
-    val extended = OrionColors.colors
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(extended.cardSurface)
-            .border(1.dp, extended.cardBorder, RoundedCornerShape(14.dp))
-            .padding(vertical = 16.dp, horizontal = 14.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            stat.value,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.ExtraBold,
-        )
-        Spacer(Modifier.height(2.dp))
-        Text(
-            stat.label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-// ---------------- Breakdown by genre ----------------
-// A single movie/episode can have several genres (CSV), so one watch can count toward
-// several bars; this is intentional — it's a breakdown of interest, not a strict
-// partition of the volume watched.
 
 @Composable
 private fun GenreBreakdownCard(items: List<WatchedItem>) {
@@ -321,64 +278,13 @@ private fun GenreBreakdownCard(items: List<WatchedItem>) {
                 val max = genreCounts.first().value
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     genreCounts.forEachIndexed { index, entry ->
-                        GenreBar(genre = entry.key, count = entry.value, max = max, rank = index)
+                        StatBar(label = entry.key, count = entry.value, max = max, rank = index)
                     }
                 }
             }
         }
     }
 }
-
-@Composable
-private fun GenreBar(genre: String, count: Int, max: Int, rank: Int) {
-    val extended = OrionColors.colors
-    val barGradient = if (rank == 0) Brush.horizontalGradient(listOf(extended.navBarSelectedContainerAlt, extended.navBarSelectedContainer))
-        else Brush.horizontalGradient(listOf(
-            MaterialTheme.colorScheme.primary.copy(alpha = (0.85f - rank * 0.1f).coerceAtLeast(0.35f)),
-            MaterialTheme.colorScheme.primary.copy(alpha = (0.85f - rank * 0.1f).coerceAtLeast(0.35f))
-        ))
-    Column {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = genre,
-                style = MaterialTheme.typography.labelLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = "$count",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Spacer(Modifier.height(6.dp))
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(10.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(fraction = (count.toFloat() / max).coerceIn(0.05f, 1f))
-                    .fillMaxHeight()
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(barGradient)
-            )
-        }
-    }
-}
-
-// ---------------- Estimated watch time ----------------
-// Based on WatchedItem.durationMinutes (TMDB runtime stored at write time, like genres).
-// Items marked watched before this field was added (or for which TMDB provided no duration,
-// e.g. an episode not yet aired/documented) have no known duration: they're counted
-// separately rather than skewing the total with an arbitrary estimate.
-// New insight: the non-stop-days equivalent, to give a more relatable sense of the total.
 
 @Composable
 private fun WatchTimeCard(items: List<WatchedItem>) {
@@ -436,18 +342,14 @@ private fun WatchTimeCard(items: List<WatchedItem>) {
     }
 }
 
-// ---------------- Activity over the last 6 months ----------------
-
 @Composable
 private fun MonthlyActivityCard(items: List<WatchedItem>) {
     val extended = OrionColors.colors
-    // Month names always rendered in English, decoupled from the (English) app locale — see
-    // DateUtils's class doc for the app's date-formatting policy.
-    val locale = java.util.Locale.US
+    val locale = Locale.US
     val monthLabels = remember {
         (0..11).map { month ->
-            java.util.Calendar.getInstance().apply { set(java.util.Calendar.MONTH, month) }
-                .getDisplayName(java.util.Calendar.MONTH, java.util.Calendar.SHORT, locale)
+            Calendar.getInstance().apply { set(Calendar.MONTH, month) }
+                .getDisplayName(Calendar.MONTH, Calendar.SHORT, locale)
                 .orEmpty()
                 .replaceFirstChar { it.uppercase(locale) }
         }
@@ -520,18 +422,11 @@ private fun MonthlyActivityCard(items: List<WatchedItem>) {
     }
 }
 
-// ---------------- Favorite days of the week ----------------
-// New insight: which day(s) of the week you watch the most, to spot habits
-// (e.g. "series night on Sundays").
-
 @Composable
 private fun WeekdayBreakdownCard(items: List<WatchedItem>) {
     val extended = OrionColors.colors
-    // Day names always rendered in English, decoupled from the (English) app locale — see
-    // DateUtils's class doc for the app's date-formatting policy.
     val dayLabels = remember {
         val locale = Locale.US
-        // Monday..Sunday, matching the counters index remap below.
         listOf(
             Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY,
             Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY,
@@ -545,12 +440,11 @@ private fun WeekdayBreakdownCard(items: List<WatchedItem>) {
     }
 
     val counts = remember(items) {
-        // Calendar.DAY_OF_WEEK: Sunday=1 ... Saturday=7 -> remapped to Monday=0..Sunday=6
         val counters = IntArray(7)
         items.forEach { w ->
             val c = Calendar.getInstance().apply { timeInMillis = w.watchedAt }
-            val dow = c.get(Calendar.DAY_OF_WEEK) // 1..7, Sunday=1
-            val index = (dow + 5) % 7 // Sunday(1)->6, Monday(2)->0, ...
+            val dow = c.get(Calendar.DAY_OF_WEEK)
+            val index = (dow + 5) % 7
             counters[index]++
         }
         counters.toList()

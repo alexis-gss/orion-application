@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -63,20 +64,42 @@ data class CinemaCardData(
     val posterPath: String?,
     val subtitle: String? = null,
     val trailingText: String? = null,
-    /** TMDB rating out of 10, when known (e.g. search/popular results).
-     *  Shown as a TV Time-style colored badge (green/amber/red). */
     val rating: Double? = null,
-    /** Comma-separated TMDB genres (e.g. "Action,Drama"), used by SeeAllScreen's genre filter. */
     val genres: String? = null,
-    /** TMDB release / first air date (yyyy-MM-dd), used by SeeAllScreen's release-date filter. */
     val releaseDate: String? = null,
-    /** Epoch-millis timestamp of when the item was added (watched, followed, or favorited), used by SeeAllScreen's added-date filter. */
     val addedAt: Long? = null
 )
 
 private val PosterShape = RoundedCornerShape(12.dp)
 private val DefaultRowPosterSize: Pair<Dp, Dp> = 64.dp to 92.dp
 private val DefaultCarouselPosterSize: Pair<Dp, Dp> = 130.dp to 192.dp
+
+/**
+ * Placeholder poster shown when TMDB provides no poster path, or the image fails to load —
+ * same idea (gradient + domain icon) as BookCoverPlaceholder in the books domain, so a
+ * missing poster never just looks like a loading bug.
+ */
+@Composable
+fun CinemaPosterPlaceholder(modifier: Modifier = Modifier) {
+    val extended = OrionColors.colors
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(extended.navBarSelectedContainerAlt, extended.navBarSelectedContainer)
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Movie,
+            contentDescription = null,
+            tint = extended.badgeText.copy(alpha = 0.85f),
+            modifier = Modifier.size(32.dp)
+        )
+    }
+}
 
 /**
  * Standalone poster (image + rounded corners). Base building block reused by MediaItemRow
@@ -94,6 +117,7 @@ fun CinemaPoster(
         contentDescription = contentDescription,
         contentScale = ContentScale.Crop,
         modifier = modifier,
+        fallback = { CinemaPosterPlaceholder() },
     )
 }
 
@@ -344,7 +368,8 @@ fun LazyListScope.cinemaCarouselSection(
             onSeeAllClick = onSeeAllClick,
         )
     }
-    if (items.isEmpty()) {
+    val visibleItems = items.take(15)
+    if (visibleItems.isEmpty()) {
         item {
             EmptySectionHint(emptyLabel, modifier = Modifier.padding(horizontal = sectionHorizontalPadding))
         }
@@ -352,7 +377,7 @@ fun LazyListScope.cinemaCarouselSection(
         item {
             CinemaCarouselRow(
                 repository = repository,
-                items = items,
+                items = visibleItems,
                 onItemClick = onItemClick,
                 posterSize = posterSize,
                 contentPadding = PaddingValues(horizontal = sectionHorizontalPadding)

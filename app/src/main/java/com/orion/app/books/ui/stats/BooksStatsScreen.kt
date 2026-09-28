@@ -52,10 +52,8 @@ fun BooksStatsScreen(repository: BooksRepository, onBack: () -> Unit) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.background
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
+                modifier = Modifier.background(Color.White)
             )
         }
     ) { padding ->
@@ -269,8 +267,6 @@ private fun BooksCategoryBar(category: String, count: Int, max: Int, rank: Int) 
 @Composable
 private fun BooksMonthlyActivityCard(items: List<ReadBook>) {
     val extended = OrionColors.colors
-    // Month names always rendered in English, decoupled from the (English) app locale — see
-    // DateUtils's class doc for the app's date-formatting policy.
     val locale = Locale.US
     val monthly = remember(items) {
         val cal = Calendar.getInstance()

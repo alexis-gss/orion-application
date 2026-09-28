@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -91,9 +92,6 @@ fun AdvancedFilterBar(
                 modifier = Modifier.weight(1f)
             )
         }
-        // weight(1f) here too: the 3 elements (genre, sort, reset) share the width
-        // equally rather than leaving the reset button at its default size (48dp) while
-        // the two selects split the rest.
         IconButton(
             onClick = onReset,
             enabled = hasActiveFilters
@@ -121,7 +119,11 @@ private fun GenreSelect(
             onClick = { expanded = true },
             modifier = Modifier.fillMaxWidth(),
         )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.heightIn(max = 280.dp)
+        ) {
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.filters_genre_all)) },
                 onClick = { onGenreSelected(null); expanded = false }
@@ -160,7 +162,11 @@ private fun SortSelect(
                 }
             }
         )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.heightIn(max = 280.dp)
+        ) {
             sortFields.forEach { field ->
                 val selected = sortField == field
                 DropdownMenuItem(

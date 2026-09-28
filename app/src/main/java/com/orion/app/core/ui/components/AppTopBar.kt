@@ -3,6 +3,7 @@ package com.orion.app.core.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -40,7 +41,7 @@ fun AppTopBar(
     title: String,
     onBackToHome: (() -> Unit)? = null,
     onOpenMenu: (() -> Unit)? = null,
-    actions: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {},
     colors: TopAppBarColors? = null
 ) {
     val extended = OrionColors.colors

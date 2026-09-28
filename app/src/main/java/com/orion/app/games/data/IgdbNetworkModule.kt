@@ -46,7 +46,7 @@ object IgdbNetworkModule {
             // force a renewal and retry exactly once with the new token.
             if (response.code == 401) {
                 response.close()
-                val freshToken = runBlocking { tokenStore.refreshToken(creds.clientId, creds.clientSecret) }
+                val freshToken = runBlocking { tokenStore.refreshTokenIfRejected(creds.clientId, creds.clientSecret, token) }
                 val retried = original.newBuilder()
                     .header("Client-ID", creds.clientId)
                     .header("Authorization", "Bearer $freshToken")
@@ -107,7 +107,10 @@ object IgdbNetworkModule {
             baseUrl = BASE_URL,
             cacheDirName = CACHE_DIR_NAME,
             interceptors = listOf(IgdbAuthInterceptor(credentialsStore, tokenStore)),
-            networkInterceptors = listOf(CacheControlInterceptor()),
+            networkInterceptors = listOf(
+                CacheControlInterceptor(),
+                com.orion.app.core.data.ApiQuotaTracker.interceptorFor(context, com.orion.app.core.data.ApiQuotaTracker.DOMAIN_GAMES),
+            ),
         )
         return retrofit.create(IgdbApi::class.java)
     }

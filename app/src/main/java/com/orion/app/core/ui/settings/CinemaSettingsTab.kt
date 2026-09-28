@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
@@ -51,6 +50,7 @@ import com.orion.app.R
 import com.orion.app.cinema.data.CinemaExportImportManager
 import com.orion.app.cinema.data.CinemaRepository
 import com.orion.app.core.data.ApiKeyStore
+import com.orion.app.core.data.ApiQuotaTracker
 import com.orion.app.core.ui.components.SectionTitle
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -64,6 +64,8 @@ fun LazyListScope.cinemaSettingsTab(
     item {
         SectionTitle(stringResource(R.string.settings_tmdb_section_title))
         TmdbKeySection(repository = repository, apiKeyStore = apiKeyStore)
+        Spacer(Modifier.height(8.dp))
+        SettingsApiQuotaSection(domain = ApiQuotaTracker.DOMAIN_CINEMA)
 
         Spacer(Modifier.height(8.dp))
         SectionTitle(stringResource(R.string.settings_cinema_data_section_title))

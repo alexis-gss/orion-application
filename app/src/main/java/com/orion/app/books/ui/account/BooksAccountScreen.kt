@@ -13,11 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,6 +34,7 @@ import com.orion.app.core.ui.components.SectionTitle
 import com.orion.app.core.ui.theme.OrionColors
 import com.orion.app.core.util.DateUtils
 import com.orion.app.books.data.BooksRepository
+import com.orion.app.books.data.ReadBook
 import com.orion.app.books.ui.components.BookCardData
 import com.orion.app.books.ui.components.bookCarouselSection
 import com.orion.app.books.ui.components.toCardData
@@ -103,12 +100,10 @@ fun BooksAccountScreen(
     }
 }
 
-// ---------------- 3 quick stat cards (same principle as cinema/games) ----------------
-
 private data class BookStatItem(val value: Int, val label: String, val accent: Boolean = false)
 
 @Composable
-private fun BooksStatsSection(readBooks: List<com.orion.app.books.data.ReadBook>, favoritesCount: Int, onOpenStats: () -> Unit) {
+private fun BooksStatsSection(readBooks: List<ReadBook>, favoritesCount: Int, onOpenStats: () -> Unit) {
     val readCount = remember(readBooks) { readBooks.count { it.status == "read" } }
     val thisMonth = remember(readBooks) {
         val cal = Calendar.getInstance()

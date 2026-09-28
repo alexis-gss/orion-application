@@ -13,9 +13,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -201,7 +204,7 @@ private fun BooksMainScaffold(repository: BooksRepository, onOpenMenu: () -> Uni
 @Composable
 private fun BooksFloatingNavBar(
     tabs: List<BookTab>,
-    currentDestination: androidx.navigation.NavDestination?,
+    currentDestination: NavDestination?,
     onTabSelected: (BookTab) -> Unit,
 ) {
     val extended = OrionColors.colors
@@ -267,7 +270,7 @@ private fun RowScope.BooksPillNavItem(tab: BookTab, selected: Boolean, onClick: 
                 onClick = onClick
             )
             .padding(horizontal = 14.dp),
-        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -277,7 +280,7 @@ private fun RowScope.BooksPillNavItem(tab: BookTab, selected: Boolean, onClick: 
             modifier = Modifier.size(21.dp).scale(iconScale)
         )
         if (selected) {
-            androidx.compose.foundation.layout.Spacer(Modifier.width(6.dp))
+            Spacer(Modifier.width(6.dp))
             Text(stringResource(tab.label), color = extended.navBarSelectedIcon, style = MaterialTheme.typography.labelLarge, maxLines = 1)
         }
     }

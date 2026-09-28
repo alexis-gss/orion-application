@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -105,6 +106,7 @@ private fun PersonCard(name: String, role: String?, profilePath: String?) {
         modifier = Modifier.width(85.dp)
     ) {
         var loadFailed by remember(profilePath) { mutableStateOf(false) }
+        var isLoading by remember(profilePath) { mutableStateOf(true) }
 
         Box(
             modifier = Modifier
@@ -119,8 +121,14 @@ private fun PersonCard(name: String, role: String?, profilePath: String?) {
                     contentDescription = name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.size(64.dp),
-                    onState = { state -> loadFailed = state is AsyncImagePainter.State.Error }
+                    onState = { state ->
+                        isLoading = state is AsyncImagePainter.State.Loading
+                        loadFailed = state is AsyncImagePainter.State.Error
+                    }
                 )
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                }
             } else {
                 Icon(
                     imageVector = Icons.Filled.Person,

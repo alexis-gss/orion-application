@@ -1,5 +1,7 @@
 package com.orion.app.books.ui.detail
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,9 +12,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -43,6 +48,7 @@ import com.orion.app.books.ui.components.seriesTabContent
 import com.orion.app.books.ui.components.toCardData
 import com.orion.app.R
 import androidx.compose.ui.res.stringResource
+import com.orion.app.books.ui.components.BookCoverPlaceholder
 import kotlinx.coroutines.launch
 
 /**
@@ -129,10 +135,8 @@ fun BookDetailScreen(
                                         volumeId = volumeId,
                                         title = b.name,
                                         coverUrl = b.coverUrl,
-                                        // French date only (see isReleasedInFrance): without a known
-                                        // French edition, no reliable release date is yet
-                                        // known for this reader.
                                         releaseTimestamp = b.frenchReleaseTimestamp,
+                                        releaseLabel = b.frenchReleaseLabel,
                                         isReleased = b.isReleasedInFrance,
                                         lastCheckedAt = System.currentTimeMillis(),
                                         categories = b.categories.joinToString(",").ifBlank { null }
@@ -219,7 +223,7 @@ fun BookDetailScreen(
 private fun BookDetailContent(
     repository: BooksRepository,
     book: HardcoverBook,
-    listState: androidx.compose.foundation.lazy.LazyListState,
+    listState: LazyListState,
     isFollowed: Boolean,
     isFavorite: Boolean,
     isRead: Boolean,
@@ -233,10 +237,6 @@ private fun BookDetailContent(
         similarBooks = try { repository.getSimilarBooks(book) } catch (e: Exception) { emptyList() }
     }
 
-    // "Series" tab: shown if Hardcover exposes an actual series id (seriesId, given
-    // priority) or, failing that, if a series name could be extracted from the title (see
-    // HardcoverBook.seriesName) — a standalone book has no Series tab at all, rather than
-    // an empty one.
     var seriesBooks by remember(book.id) { mutableStateOf<List<HardcoverBook>>(emptyList()) }
     val hasSeriesSignal = book.seriesId != null || book.seriesName != null
     var isSeriesLoading by remember(book.id) { mutableStateOf(hasSeriesSignal) }
@@ -248,7 +248,7 @@ private fun BookDetailContent(
     }
     val detailsTab = stringResource(R.string.tab_details)
     val seriesTab = stringResource(R.string.book_series_tab)
-    val bookSimilar = stringResource(R.string.book_similar_title)
+    val bookSimilar = stringResource(R.string.recommendations_title)
     val bookSeriesEmpty = stringResource(R.string.book_series_empty)
     val bookTabs = if (hasSeriesSignal) listOf(detailsTab, seriesTab) else listOf(detailsTab)
     var selectedTabIndex by remember(book.id) { mutableIntStateOf(0) }
@@ -259,9 +259,6 @@ private fun BookDetailContent(
 
     LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
         item {
-            // No wide banner on Hardcover's side (no backdrop, unlike TMDB/IGDB):
-            // backdropPath is left null, DetailHeader then falls back to the plain
-            // background gradient behind the poster.
             DetailHeader(
                 backdropPath = null,
                 posterPath = book.coverUrl,
@@ -270,7 +267,7 @@ private fun BookDetailContent(
                 voteAverage = book.displayRating,
                 infoLine = infoLine.ifBlank { null },
                 genres = book.categories.map { it.substringBefore(" / ") }.distinct(),
-                posterFallback = { com.orion.app.books.ui.components.BookCoverPlaceholder() },
+                posterFallback = { BookCoverPlaceholder() },
             )
         }
 
@@ -289,16 +286,16 @@ private fun BookDetailContent(
                 onFavoriteToggle = { onFavoriteToggle(book) },
                 favoriteDisabled = false,
                 onExtraAction = book.previewUrl?.let { url ->
-                    { context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))) }
+                    { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
                 }
             )
         }
 
         if (bookTabs.size > 1) {
             item {
-                androidx.compose.material3.TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.fillMaxWidth()) {
+                TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.fillMaxWidth()) {
                     bookTabs.forEachIndexed { index, tabLabel ->
-                        androidx.compose.material3.Tab(
+                        Tab(
                             selected = selectedTabIndex == index,
                             onClick = { selectedTabIndex = index },
                             text = { Text(text = tabLabel) }
@@ -310,8 +307,6 @@ private fun BookDetailContent(
 
         when (selectedTabIndex) {
             0 -> {
-                // Synopsis/info/recommendations: only in the "Details" tab, not shown in
-                // the "Series" tab — same layout as cinema.
                 item {
                     SynopsisSection(
                         tagline = null,
@@ -320,8 +315,6 @@ private fun BookDetailContent(
                 }
                 item { BookInfoSection(book) }
                 if (similarBooks.isNotEmpty()) {
-                    // Horizontal carousel, same presentation as cinema/games
-                    // recommendations (bookCarouselSection), rather than a vertical list.
                     bookCarouselSection(
                         title = bookSimilar,
                         items = similarBooks.map { it.toCardData() },

@@ -19,17 +19,46 @@ import kotlinx.coroutines.flow.StateFlow
  * /data/data/com.orion.app/shared_prefs/.xml).
  */
 internal fun createEncryptedPrefs(context: Context, prefsName: String): SharedPreferences {
+    return try {
+        openEncryptedPrefs(context, prefsName)
+    } catch (e: Exception) {
+        // Typically after a restore/migration where the prefs files came back but the Keystore
+        // master key did not (AEADBadTagException, InvalidProtocolBufferException...). Left
+        // unhandled this crashes the app at every launch. The stored secrets are unrecoverable
+        // anyway: wipe them and start clean, the user just has to re-enter their API keys.
+        SECURE_PREFS_FILES.forEach { context.deleteSharedPreferences(it) }
+        context.deleteSharedPreferences(ANDROIDX_KEYSET_PREFS)
+        openEncryptedPrefs(context, prefsName)
+    }
+}
+
+/** Every encrypted prefs file used by the app's credential stores. Keep in sync with the backup rules XML. */
+private val SECURE_PREFS_FILES = listOf(
+    "orion_settings_secure",
+    "orion_books_settings_secure",
+    "orion_igdb_settings_secure",
+    "orion_igdb_token_secure",
+)
+
+/** Prefs file in which androidx.security-crypto keeps its (Keystore-wrapped) keysets. */
+private const val ANDROIDX_KEYSET_PREFS = "__androidx_security_crypto_encrypted_prefs__"
+
+private fun openEncryptedPrefs(context: Context, prefsName: String): SharedPreferences {
     val masterKey = MasterKey.Builder(context)
         .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
         .build()
 
-    return EncryptedSharedPreferences.create(
+    val prefs = EncryptedSharedPreferences.create(
         context,
         prefsName,
         masterKey,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
+    // Force decryption of every entry now so an undecryptable file fails here (and is recovered
+    // above) rather than later, inside a StateFlow initializer.
+    prefs.all
+    return prefs
 }
 
 /**
@@ -57,9 +86,6 @@ abstract class SingleKeyStore protected constructor(
     fun save(key: String) {
         val trimmed = key.trim()
         _apiKey.value = trimmed.ifBlank { null }
-        // apply() writes to memory immediately and persists in the background, unlike
-        // commit() which blocks the calling thread until the disk write completes
-        // (lint: ApplySharedPref).
         prefs.edit().putString(prefsKey, trimmed).apply()
     }
 

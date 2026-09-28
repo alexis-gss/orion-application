@@ -100,9 +100,6 @@ fun GamesSearchScreen(repository: GamesRepository, onOpenItem: (Int) -> Unit, on
         }
     }
 
-    // Available genres derived from the results themselves (no fixed IGDB taxonomy to
-    // load separately), like the Movie/Series filter on the cinema side but adapted:
-    // games can have several genres, so the list is open-ended rather than fixed.
     val availableGenres = remember(results) {
         listOf(ALL_GENRES) + results.flatMap { it.genres.map { g -> g.name } }.distinct().sorted()
     }
@@ -181,7 +178,7 @@ fun GamesSearchScreen(repository: GamesRepository, onOpenItem: (Int) -> Unit, on
                             ) {
                                 item { SectionTitle(stringResource(R.string.search_popular_now)) }
                                 itemsIndexed(popularItems.take(POPULAR_LIMIT), key = { _, g -> g.id }) { index, game ->
-                                    Row(Modifier.padding(bottom = if (index == popularItems.take(POPULAR_LIMIT).lastIndex) 0.dp else 12.dp)) {
+                                    Row(Modifier.padding(bottom = if (index == popularItems.take(POPULAR_LIMIT).lastIndex) 0.dp else 16.dp)) {
                                         GameItemRow(item = game.toCardData(), onClick = { onOpenItem(game.id) })
                                     }
                                 }

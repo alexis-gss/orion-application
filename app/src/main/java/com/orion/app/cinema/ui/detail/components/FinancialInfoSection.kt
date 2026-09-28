@@ -35,14 +35,12 @@ fun FinancialInfoSection(budget: Long?, revenue: Long?) {
 
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
 
-    // Profit / loss calculation
     val profit = if (hasBudget && hasRevenue) revenue!! - budget!! else null
 
-    // Colors with opacity (alpha): adapt correctly to both Light Mode and Dark Mode
     val (profitColor, profitContainerColor) = when {
         profit == null -> MaterialTheme.colorScheme.onSurface to MaterialTheme.colorScheme.surfaceContainerHigh
-        profit >= 0 -> Color(0xFF4CAF50) to Color(0xFF4CAF50).copy(alpha = 0.15f) // Green
-        else -> Color(0xFFE53935) to Color(0xFFE53935).copy(alpha = 0.15f)        // Red
+        profit >= 0 -> Color(0xFF4CAF50) to Color(0xFF4CAF50).copy(alpha = 0.15f)
+        else -> Color(0xFFE53935) to Color(0xFFE53935).copy(alpha = 0.15f)
     }
 
     Column(modifier = Modifier.padding(bottom = 8.dp)) {
@@ -51,7 +49,6 @@ fun FinancialInfoSection(budget: Long?, revenue: Long?) {
             modifier = Modifier.padding(horizontal = 16.dp),
         )
 
-        // LazyRow lets the cards keep a minimum width without being compressed
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -112,7 +109,6 @@ private fun FinancialCard(
             Spacer(Modifier.height(2.dp))
             Text(
                 text = value,
-                // Switched to a smaller size (labelLarge or bodySmall) for large numbers
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
                 color = valueColor,

@@ -101,9 +101,11 @@ fun BooksSearchScreen(repository: BooksRepository, onOpenItem: (String) -> Unit,
                 results = fresh
             }
         } catch (e: Exception) {
-            android.util.Log.e("BooksSearch", "search(\"$query\") failed", e)
-            if (e is retrofit2.HttpException) {
-                android.util.Log.e("BooksSearch", "HTTP ${e.code()}: ${e.response()?.errorBody()?.string()}")
+            if (com.orion.app.BuildConfig.DEBUG) {
+                android.util.Log.e("BooksSearch", "search(\"$query\") failed", e)
+                if (e is retrofit2.HttpException) {
+                    android.util.Log.e("BooksSearch", "HTTP ${e.code()}: ${e.response()?.errorBody()?.string()}")
+                }
             }
             if (myToken == searchToken) {
                 errorMessage = context.getString(R.string.books_search_error)
@@ -115,8 +117,6 @@ fun BooksSearchScreen(repository: BooksRepository, onOpenItem: (String) -> Unit,
         }
     }
 
-    // Available categories derived from the results themselves, like the genre filter on
-    // the games side: Hardcover has no fixed taxonomy to load separately.
     val availableCategories = remember(results) {
         listOf(ALL_CATEGORIES) + results.mapNotNull { it.primaryCategory }.distinct().sorted()
     }
@@ -195,7 +195,7 @@ fun BooksSearchScreen(repository: BooksRepository, onOpenItem: (String) -> Unit,
                             ) {
                                 item { SectionTitle(stringResource(R.string.search_popular_now)) }
                                 itemsIndexed(popularItems.take(POPULAR_LIMIT), key = { _, b -> b.id }) { index, book ->
-                                    Row(Modifier.padding(bottom = if (index == popularItems.take(POPULAR_LIMIT).lastIndex) 0.dp else 12.dp)) {
+                                    Row(Modifier.padding(bottom = if (index == popularItems.take(POPULAR_LIMIT).lastIndex) 0.dp else 16.dp)) {
                                         BookItemRow(item = book.toCardData(), onClick = { onOpenItem(book.id) })
                                     }
                                 }

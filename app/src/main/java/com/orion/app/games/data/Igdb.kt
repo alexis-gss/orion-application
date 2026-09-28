@@ -83,6 +83,7 @@ data class IgdbGame(
     @SerialName("involved_companies") val involvedCompanies: List<IgdbInvolvedCompany> = emptyList(),
     @SerialName("release_dates") val releaseDates: List<IgdbReleaseDate> = emptyList(),
     val screenshots: List<IgdbScreenshot> = emptyList(),
+    val artworks: List<IgdbScreenshot> = emptyList(),
     val videos: List<IgdbVideo> = emptyList(),
     @SerialName("similar_games") val similarGames: List<Int> = emptyList(),
     @SerialName("game_modes") val gameModes: List<IgdbGameMode> = emptyList(),
@@ -109,6 +110,9 @@ data class IgdbGame(
     // (franchises alone missed the vast majority of real cases).
     val franchises: List<IgdbFranchise> = emptyList(),
     val collections: List<IgdbCollection> = emptyList(),
+    // Region-specific cover art (e.g. the Japanese boxart vs the US/EU one), shown in the
+    // Media tab instead of artworks (promotional key art, removed from that tab).
+    @SerialName("game_localizations") val gameLocalizations: List<IgdbGameLocalization> = emptyList(),
 ) {
     val coverUrl: String? get() = cover?.url?.toHighRes()
     val year: String? get() = firstReleaseDate?.let {
@@ -166,6 +170,10 @@ data class IgdbGame(
      *  Never combine these with [franchiseIds] in the same filter. */
     val collectionIds: List<Int> get() = collections.matchingTitleCollections(name).map { it.id }
 
+    /** IGDB "Localized covers" (region-specific box art), deduplicated, for the Media tab —
+     *  replaces artworks (promotional key art) there. */
+    val localizedCoverUrls: List<String> get() = gameLocalizations.mapNotNull { it.cover?.fullUrl }.distinct()
+
     /** Next known future release date (base game or an edition), for Planning. */
     val nextReleaseTimestamp: Long? get() {
         val now = System.currentTimeMillis() / 1000
@@ -198,7 +206,7 @@ private fun List<IgdbCollection>.matchingTitleCollections(gameTitle: String): Li
 private fun titleOverlaps(gameTitle: String, seriesName: String): Boolean =
     gameTitle.contains(seriesName, ignoreCase = true) || seriesName.contains(gameTitle, ignoreCase = true)
 
-private fun String.toHighRes(): String =
+internal fun String.toHighRes(): String =
     // IGDB returns URLs as "t_thumb" by default; bumped to high quality to match the same
     // poster sizes used on the cinema side.
     this.replace("t_thumb", "t_cover_big").let { if (it.startsWith("//")) "https:$it" else it }
@@ -215,7 +223,23 @@ private fun String.toScreenshotRes(): String =
     this.replace("t_thumb", "t_1080p").let { if (it.startsWith("//")) "https:$it" else it }
 
 @Serializable
-data class IgdbCover(val url: String? = null)
+data class IgdbCover(val url: String? = null) {
+    val fullUrl: String? get() = url?.toHighRes()
+}
+
+/** IGDB "Localized covers" (game_localizations endpoint): a region-specific box art (e.g.
+ *  the Japanese cover vs the US/EU one), each tied to an IGDB [IgdbRegion]. */
+@Serializable
+data class IgdbGameLocalization(
+    val cover: IgdbCover? = null,
+    val region: IgdbRegion? = null,
+)
+
+@Serializable
+data class IgdbRegion(
+    val name: String? = null,
+    val identifier: String? = null,
+)
 
 @Serializable
 data class IgdbGenre(val id: Int, val name: String)

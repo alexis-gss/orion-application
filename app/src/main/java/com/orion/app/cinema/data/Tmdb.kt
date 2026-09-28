@@ -204,6 +204,9 @@ interface TmdbApi {
     @GET("configuration")
     suspend fun testApiKeyDirect(@Query("api_key") key: String): ConfigurationResponse
 
+    @GET("configuration")
+    suspend fun testBearerDirect(@retrofit2.http.Header("Authorization") authorization: String): ConfigurationResponse
+
     @GET("search/multi")
     suspend fun searchMulti(
         @Query("query") query: String,

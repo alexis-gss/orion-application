@@ -19,17 +19,29 @@ object NetworkModule {
     private const val API_KEY_PARAM = "api_key"
     private const val CACHE_DIR_NAME = "tmdb_http_cache"
 
-    /** Appends `?api_key=<key>` to every request, unless the key is already present in the URL (e.g. a manual key-validation probe). */
+    /**
+     * A TMDB v4 "API Read Access Token" is a JWT (three dot-separated parts, starts with "eyJ").
+     * Unlike the v3 key it can be sent in a header, which keeps it out of the URL and therefore
+     * out of OkHttp's on-disk cache index and any logs.
+     */
+    internal fun looksLikeV4Token(key: String): Boolean =
+        key.startsWith("eyJ") && key.count { it == '.' } == 2 && key.length > 60
+
+    /** Authenticates every request: Bearer header for a v4 token, `?api_key=` for a v3 key. Leaves requests that already carry credentials (key-validation probes) untouched. */
     private class ApiKeyInterceptor(private val apiKeyStore: ApiKeyStore) : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {
             val original = chain.request()
 
-            // If the key is already in the URL (e.g. a validation probe), don't replace it
-            if (original.url.queryParameter(API_KEY_PARAM) != null) {
+            if (original.url.queryParameter(API_KEY_PARAM) != null || original.header("Authorization") != null) {
                 return chain.proceed(original)
             }
 
             val key = apiKeyStore.apiKey.value.orEmpty()
+            // No key configured yet: don't send a meaningless empty api_key, let the call fail cleanly.
+            if (key.isBlank()) return chain.proceed(original)
+            if (looksLikeV4Token(key)) {
+                return chain.proceed(original.newBuilder().header("Authorization", "Bearer $key").build())
+            }
             val newUrl = original.url.newBuilder()
                 .addQueryParameter(API_KEY_PARAM, key)
                 .build()
@@ -71,7 +83,10 @@ object NetworkModule {
             baseUrl = BASE_URL,
             cacheDirName = CACHE_DIR_NAME,
             interceptors = listOf(ApiKeyInterceptor(apiKeyStore)),
-            networkInterceptors = listOf(CacheControlInterceptor()),
+            networkInterceptors = listOf(
+                CacheControlInterceptor(),
+                ApiQuotaTracker.interceptorFor(context, ApiQuotaTracker.DOMAIN_CINEMA),
+            ),
         )
         return retrofit.create(TmdbApi::class.java)
     }

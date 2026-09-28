@@ -35,15 +35,9 @@ import com.orion.app.core.ui.theme.OrionColors
 /** Domains available from the home screen. */
 enum class AppUniverse { CINEMA, GAMES, BOOKS }
 
-// Brand colors of the 3 domains: the exact gradient already used throughout each
-// domain (selected nav bar, stats bars, account header...), namely
-// Brush.horizontalGradient(navBarSelectedContainerAlt -> navBarSelectedContainer) in
-// Theme.kt, rather than a plain pair of colors invented for this screen.
-// Made `internal` (not `private`) so the sidebar (AppSidebarContent) can reuse the
-// exact same palette/icons instead of duplicating them.
 internal val CinemaGradient = listOf(Color(0xFFFFDB74), Color(0xFFFFC93C))
-internal val GamesGradient = listOf(Color(0xFFB58CFF), Color(0xFF9147FF))
-internal val BooksGradient = listOf(Color(0xFF5B8DFF), Color(0xFF2258D3))
+internal val GamesGradient = listOf(Color(0xFFE4D6FF), Color(0xFFCBB2FF))
+internal val BooksGradient = listOf(Color(0xFFD9E2FF), Color(0xFFB0C6FF))
 
 /** Icon shown on this universe's card, shared between the home screen and the sidebar. */
 internal fun AppUniverse.icon(): ImageVector = when (this) {
@@ -59,11 +53,12 @@ internal fun AppUniverse.gradient(): List<Color> = when (this) {
     AppUniverse.BOOKS -> BooksGradient
 }
 
-/** Tint of the icon glyph itself (dark on the light cinema yellow, white elsewhere). */
+/** Tint of the icon glyph itself: dark/near-black on each domain's light gradient,
+ *  same principle for all three domains (cinema yellow, games lavender, books blue). */
 internal fun AppUniverse.iconTint(): Color = when (this) {
     AppUniverse.CINEMA -> Color(0xFF241A00)
-    AppUniverse.GAMES -> Color.White
-    AppUniverse.BOOKS -> Color.White
+    AppUniverse.GAMES -> Color(0xFF230046)
+    AppUniverse.BOOKS -> Color(0xFF001A41)
 }
 
 @Composable
@@ -159,7 +154,7 @@ fun HomeScreen(onSelectUniverse: (AppUniverse) -> Unit, onOpenOptions: () -> Uni
                     onClick = { onSelectUniverse(universe) }
                 )
                 if (index != AppUniverse.entries.lastIndex) {
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(16.dp))
                 }
             }
         }
@@ -202,7 +197,7 @@ internal fun UniverseCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(

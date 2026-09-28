@@ -16,17 +16,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// ===================================================================================
-// TV Time-style "streaming app" palette: near-black / heavily saturated anthracite
-// background in dark mode (this app type's main mode), the brand's gold-yellow as a
-// single, strong accent (never diluted across many colors), movie ratings colored
-// separately (green / amber / red) to remain a standalone signal.
-// ===================================================================================
-
-// ---------------------------------------------------------------------------------
-// Light palette — warm cream background, the logo's black as a strong accent, yellow
-// as the highlight
-// ---------------------------------------------------------------------------------
 private val LightColors = lightColorScheme(
     primary = Color(0xFF17171A),
     onPrimary = Color(0xFFFFFFFF),
@@ -57,10 +46,6 @@ private val LightColors = lightColorScheme(
     inversePrimary = Color(0xFFFFC93C),
 )
 
-// ---------------------------------------------------------------------------------
-// Dark palette — deep near-black in a streaming-app style, dominant gold-yellow,
-// slightly bluish surfaces to avoid a "dirty gray" look.
-// ---------------------------------------------------------------------------------
 private val DarkColors = darkColorScheme(
     primary = Color(0xFFFFC93C),
     onPrimary = Color(0xFF241A00),
@@ -91,12 +76,6 @@ private val DarkColors = darkColorScheme(
     inversePrimary = Color(0xFF8A5D00),
 )
 
-/**
- * Custom colors not covered by the standard Material3 ColorScheme: poster gradients,
- * colored rating badges (the TV Time-style "signature look"), floating nav's frosted
- * glass background, home screens' hero gradient.
- * Accessible everywhere via `OrionColors.colors`.
- */
 data class OrionExtendedColors(
     val posterOverlayTop: Color,
     val posterOverlayBottom: Color,
@@ -163,10 +142,6 @@ private val DarkExtendedColors = OrionExtendedColors(
     chipSurface = Color(0xFF232228),
 )
 
-// ---------------------------------------------------------------------------------
-// "Video games" palette — Twitch-style purple gradient, same structure as cinema so
-// MaterialTheme.colorScheme stays usable everywhere without changing UI code.
-// ---------------------------------------------------------------------------------
 private val GamesLightColors = lightColorScheme(
     primary = Color(0xFF6441A5),
     onPrimary = Color(0xFFFFFFFF),
@@ -232,13 +207,13 @@ private val GamesLightExtendedColors = OrionExtendedColors(
     posterOverlayBottom = Color(0xE6141312),
     posterOverlayText = Color(0xFFFFFFFF),
     badgeBackground = Color(0xFF9147FF),
-    badgeText = Color(0xFFFFFFFF),
+    badgeText = Color(0xFF230046),
     navBarContainer = Color(0xFF18131F),
     navBarBorder = Color(0x1FFFFFFF),
-    navBarSelectedContainer = Color(0xFF9147FF),
-    navBarSelectedContainerAlt = Color(0xFFB58CFF),
+    navBarSelectedContainer = Color(0xFFCBB2FF),
+    navBarSelectedContainerAlt = Color(0xFFE4D6FF),
     navBarIcon = Color(0xB3FFFFFF),
-    navBarSelectedIcon = Color(0xFFFFFFFF),
+    navBarSelectedIcon = Color(0xFF230046),
     cardSurface = Color(0xFFFFFFFF),
     cardBorder = Color(0x14000000),
     heroGradientStart = Color(0xFF9147FF),
@@ -254,13 +229,13 @@ private val GamesDarkExtendedColors = OrionExtendedColors(
     posterOverlayBottom = Color(0xF2000000),
     posterOverlayText = Color(0xFFFFFFFF),
     badgeBackground = Color(0xFF9147FF),
-    badgeText = Color(0xFFFFFFFF),
+    badgeText = Color(0xFF2A0060),
     navBarContainer = Color(0xFF161120),
     navBarBorder = Color(0x1FFFFFFF),
-    navBarSelectedContainer = Color(0xFF9147FF),
-    navBarSelectedContainerAlt = Color(0xFFBE9DFF),
+    navBarSelectedContainer = Color(0xFFCBB2FF),
+    navBarSelectedContainerAlt = Color(0xFFDCC7FF),
     navBarIcon = Color(0x99EFECE4),
-    navBarSelectedIcon = Color(0xFFFFFFFF),
+    navBarSelectedIcon = Color(0xFF2A0060),
     cardSurface = Color(0xFF1C1729),
     cardBorder = Color(0x14FFFFFF),
     heroGradientStart = Color(0xFF3B1E70),
@@ -271,10 +246,6 @@ private val GamesDarkExtendedColors = OrionExtendedColors(
     chipSurface = Color(0xFF272235),
 )
 
-// ---------------------------------------------------------------------------------
-// "Books" palette — library/bookstore-style blue, same structure as cinema and video
-// games so MaterialTheme.colorScheme stays usable everywhere.
-// ---------------------------------------------------------------------------------
 private val BooksLightColors = lightColorScheme(
     primary = Color(0xFF2258D3),
     onPrimary = Color(0xFFFFFFFF),
@@ -340,13 +311,13 @@ private val BooksLightExtendedColors = OrionExtendedColors(
     posterOverlayBottom = Color(0xE6141312),
     posterOverlayText = Color(0xFFFFFFFF),
     badgeBackground = Color(0xFF2258D3),
-    badgeText = Color(0xFFFFFFFF),
+    badgeText = Color(0xFF001A41),
     navBarContainer = Color(0xFF13161F),
     navBarBorder = Color(0x1FFFFFFF),
-    navBarSelectedContainer = Color(0xFF2258D3),
-    navBarSelectedContainerAlt = Color(0xFF5B8DFF),
+    navBarSelectedContainer = Color(0xFFB0C6FF),
+    navBarSelectedContainerAlt = Color(0xFFD9E2FF),
     navBarIcon = Color(0xB3FFFFFF),
-    navBarSelectedIcon = Color(0xFFFFFFFF),
+    navBarSelectedIcon = Color(0xFF001A41),
     cardSurface = Color(0xFFFFFFFF),
     cardBorder = Color(0x14000000),
     heroGradientStart = Color(0xFF2258D3),
@@ -362,13 +333,13 @@ private val BooksDarkExtendedColors = OrionExtendedColors(
     posterOverlayBottom = Color(0xF2000000),
     posterOverlayText = Color(0xFFFFFFFF),
     badgeBackground = Color(0xFF2258D3),
-    badgeText = Color(0xFFFFFFFF),
+    badgeText = Color(0xFF002C6D),
     navBarContainer = Color(0xFF10131C),
     navBarBorder = Color(0x1FFFFFFF),
-    navBarSelectedContainer = Color(0xFF2258D3),
-    navBarSelectedContainerAlt = Color(0xFF6E9BFF),
+    navBarSelectedContainer = Color(0xFFB0C6FF),
+    navBarSelectedContainerAlt = Color(0xFFC7D6FF),
     navBarIcon = Color(0x99EFECE4),
-    navBarSelectedIcon = Color(0xFFFFFFFF),
+    navBarSelectedIcon = Color(0xFF002C6D),
     cardSurface = Color(0xFF171A24),
     cardBorder = Color(0x14FFFFFF),
     heroGradientStart = Color(0xFF14285C),

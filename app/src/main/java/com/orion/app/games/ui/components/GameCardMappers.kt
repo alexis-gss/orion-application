@@ -22,9 +22,6 @@ fun FollowedGame.toCardData(context: Context): GameCardData = GameCardData(
     key = "followed_$igdbId",
     igdbId = igdbId,
     title = title,
-    // Developer studio rather than the release date: on the Planning card, the date is
-    // already shown separately (group header + "days remaining" badge), repeating it here
-    // added nothing while the studio is info missing from the rest of the card.
     subtitle = studio,
     coverUrl = coverUrl,
     trailingText = if (isReleased) null else context.getString(R.string.game_status_upcoming),

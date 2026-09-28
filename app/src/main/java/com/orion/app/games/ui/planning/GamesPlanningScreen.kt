@@ -94,8 +94,6 @@ fun GamesPlanningScreen(repository: GamesRepository, onOpenItem: (Int) -> Unit, 
                     )
                 }
             } else {
-                // Grouped by release date (same principle as PlanningScreen on the
-                // cinema side): one header per distinct day, keeping the order already sorted.
                 val groups: List<Pair<Long?, List<FollowedGame>>> = remember(upcoming) {
                     val result = mutableListOf<Pair<Long?, MutableList<FollowedGame>>>()
                     upcoming.forEach { game ->

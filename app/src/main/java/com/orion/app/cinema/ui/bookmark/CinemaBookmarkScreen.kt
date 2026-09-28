@@ -33,21 +33,18 @@ fun CinemaBookmarkScreen(repository: CinemaRepository, onOpenItem: (String, Int)
     val context = LocalContext.current
     var isRefreshing by remember { mutableStateOf(false) }
 
-    // 1. Shows marked "fully watched" (seasonNumber == null)
     val fullyWatchedShowIds = remember(watched) {
         watched.filter { it.mediaType == "tv" && it.seasonNumber == null }
             .map { it.tmdbId }
             .toSet()
     }
 
-    // 2. Watched episodes in the "tmdbId_season_episode" format
     val watchedEpisodesSet = remember(watched) {
         watched.filter { it.mediaType == "tv" && it.seasonNumber != null && it.episodeNumber != null }
             .map { "${it.tmdbId}_${it.seasonNumber}_${it.episodeNumber}" }
             .toSet()
     }
 
-    // 2bis. Number of episodes watched per show (for the posters' "remaining to watch" badge).
     val watchedEpisodesCountByShow = remember(watched) {
         watched.filter { it.mediaType == "tv" && it.seasonNumber != null && it.episodeNumber != null }
             .groupingBy { it.tmdbId }
@@ -64,23 +61,15 @@ fun CinemaBookmarkScreen(repository: CinemaRepository, onOpenItem: (String, Int)
         followed.filter { item ->
             if (item.mediaType != "tv") return@filter false
 
-            // A followed show with no episode aired yet (e.g. VisionQuest, announced but
-            // not released) has nothing to "watch" in this screen's sense: it stays in
-            // Planning (upcoming) but must not appear here until it has at least one past
-            // air date.
             val hasAiredContent = item.lastAiredSeasonNumber != null ||
                     (item.nextAirDate != null && DateUtils.isWatchable(item.nextAirDate))
             if (!hasAiredContent) return@filter false
 
-            // If the whole show is checked as watched -> hide it right away!
             if (item.tmdbId in fullyWatchedShowIds) return@filter false
 
-            // Last episode "officially" aired according to TMDB
             val lastSeason = item.lastAiredSeasonNumber
             val lastEpisode = item.lastAiredEpisodeNumber
 
-            // TMDB can publish next_episode_to_air with a slight delay after its actual
-            // release: if its date is already past or today, treat it as released.
             val nextIsActuallyReleased = item.nextAirDate != null &&
                     DateUtils.isWatchable(item.nextAirDate)
 
@@ -101,13 +90,11 @@ fun CinemaBookmarkScreen(repository: CinemaRepository, onOpenItem: (String, Int)
         }
     }
 
-    // Shows in tvToWatch that watching has already started on (at least 1 episode watched)
     val inProgressSeries = remember(tvToWatch, watchedEpisodesSet, watchedEpisodesCountByShow) {
         tvToWatch.filter { item ->
             watchedEpisodesSet.any { it.startsWith("${item.tmdbId}_") }
         }.map { it.toBookmarkCardData(context, watchedEpisodesCountByShow[it.tmdbId] ?: 0) }
     }
-    // Shows in tvToWatch that have never been started
     val notStartedSeries = remember(tvToWatch, watchedEpisodesSet, watchedEpisodesCountByShow) {
         tvToWatch.filter { item ->
             watchedEpisodesSet.none { it.startsWith("${item.tmdbId}_") }
@@ -116,7 +103,6 @@ fun CinemaBookmarkScreen(repository: CinemaRepository, onOpenItem: (String, Int)
 
     val isEmpty = movies.isEmpty() && inProgressSeries.isEmpty() && notStartedSeries.isEmpty()
 
-    // "Just in case" refresh on open, throttled to 6h on the Repository side like Planning.
     LaunchedEffect(followed.map { it.tmdbId }) {
         followed.forEach { item ->
             repository.refreshFollowedIfStale(item)

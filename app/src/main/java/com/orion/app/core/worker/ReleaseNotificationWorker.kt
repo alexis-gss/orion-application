@@ -22,6 +22,8 @@ import kotlinx.coroutines.flow.first
 class ReleaseNotificationWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
         val app = applicationContext as OrionApplication
+        // On a cold start (process created by WorkManager) the preferences are still loading.
+        app.notificationPreferenceStore.awaitLoaded()
         if (!app.notificationPreferenceStore.isEnabled.value) {
             return Result.success()
         }
@@ -70,6 +72,8 @@ class ReleaseNotificationWorker(context: Context, params: WorkerParameters) : Co
             )
 
             Result.success()
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.retry()
         }

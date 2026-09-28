@@ -37,10 +37,8 @@ fun CinemaGateScreen(repository: CinemaRepository, apiKeyStore: ApiKeyStore) {
         isChecking = true
         scope.launch {
             try {
-                // 1. Test the key BEFORE saving it
                 repository.testApiKey(trimmed)
 
-                // 2. If the test passes (no exception), persist the key for good
                 apiKeyStore.save(trimmed)
 
             } catch (e: HttpException) {
