@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,14 +42,29 @@ class NotificationPreferenceStore(private val context: Context, private val scop
     private val _onChanged = MutableStateFlow(0L)
     val onChanged: StateFlow<Long> = _onChanged
 
+    /** Completed once the persisted values have been read from DataStore. */
+    private val loaded = CompletableDeferred<Unit>()
+
+    /**
+     * Suspends until the persisted preferences have been loaded. Anything that reads [isEnabled] or
+     * [time] outside of the UI (Application.onCreate, background workers) MUST call this first:
+     * before loading, [isEnabled] is a placeholder `false`, which used to cancel the scheduled
+     * notification work on every cold start.
+     */
+    suspend fun awaitLoaded() = loaded.await()
+
     init {
         scope.launch {
-            val stored = context.notificationDataStore.data.first()
-            _isEnabled.value = stored[KEY_ENABLED] ?: false
-            _time.value = NotificationTime(
-                hour = stored[KEY_HOUR] ?: 9,
-                minute = stored[KEY_MINUTE] ?: 0
-            )
+            try {
+                val stored = context.notificationDataStore.data.first()
+                _isEnabled.value = stored[KEY_ENABLED] ?: false
+                _time.value = NotificationTime(
+                    hour = stored[KEY_HOUR] ?: 9,
+                    minute = stored[KEY_MINUTE] ?: 0
+                )
+            } finally {
+                loaded.complete(Unit)
+            }
         }
     }
 

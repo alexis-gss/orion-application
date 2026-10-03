@@ -1,5 +1,7 @@
 package com.orion.app.cinema.ui.detail
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,8 +39,6 @@ import com.orion.app.core.util.DateUtils
 import androidx.compose.ui.res.stringResource
 import com.orion.app.R
 
-// Tab labels are resolved in the Composable via stringResource (see below).
-
 @Composable
 fun MovieDetailContent(
     repository: CinemaRepository,
@@ -56,8 +56,6 @@ fun MovieDetailContent(
     val recommendationsTitle = stringResource(R.string.recommendations_title)
     var selectedTabIndex by remember(movie.id) { mutableIntStateOf(0) }
 
-    // Gallery (HD posters/backdrops) loaded on demand, only the first time the Media
-    // tab is opened — not during the page's initial load.
     var isGalleryLoading by remember(movie.id) { mutableStateOf(false) }
     var gallery by remember(movie.id) { mutableStateOf<CinemaGallery?>(null) }
     var hasFetchedGallery by remember(movie.id) { mutableStateOf(false) }
@@ -75,9 +73,8 @@ fun MovieDetailContent(
         }
     }
 
-    // Fullscreen viewer, opened by clicking an image in the Media tab.
     var galleryViewerImages by remember { mutableStateOf<List<GalleryImage>>(emptyList()) }
-    var galleryViewerIndex by remember { mutableIntStateOf(0) } // avoids autoboxing (lint: AutoboxingStateCreation)
+    var galleryViewerIndex by remember { mutableIntStateOf(0) }
     if (galleryViewerImages.isNotEmpty()) {
         PosterGalleryDialog(
             posters = galleryViewerImages.map { it.fullQualityUrl },
@@ -86,8 +83,6 @@ fun MovieDetailContent(
         )
     }
 
-    // ActionButtons (shared component, see core/ui/components) no longer knows about
-    // VideoItem: the YouTube-opening lambda is built here instead of passing it the video object.
     val context = LocalContext.current
     val trailer = remember(movie.id) {
         movie.videos?.results?.firstOrNull { it.site == "YouTube" && it.type == "Trailer" }
@@ -96,7 +91,7 @@ fun MovieDetailContent(
     val onTrailerAction: (() -> Unit)? = trailer?.let { tr ->
         {
             context.startActivity(
-                android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://www.youtube.com/watch?v=${tr.key}"))
+                Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/watch?v=${tr.key}"))
             )
         }
     }
@@ -171,8 +166,6 @@ fun MovieDetailContent(
                         revenue = movie.revenue
                     )
                 }
-                // US region: matches this app's English/US-focused content (see the
-                // language and TMDB "en-US" query defaults elsewhere in the codebase).
                 val providers = movie.watchProviders?.results?.get("US")?.flatrate.orEmpty()
                 if (providers.isNotEmpty()) {
                     item {

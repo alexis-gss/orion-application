@@ -12,12 +12,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.orion.app.R
+import com.orion.app.core.util.sortWithUnknownLast
 import com.orion.app.books.ui.components.BookBadge
 import com.orion.app.books.ui.components.BookCardData
 import com.orion.app.books.ui.components.BookCover
@@ -41,9 +43,6 @@ fun BooksSeeAllScreen(
     onOpenItem: (BookCardData) -> Unit,
     onBack: () -> Unit,
 ) {
-    // Each Hardcover category stored as CSV (generic segment, e.g. "Fiction") is split
-    // to build the list of available chips, sorted alphabetically and deduplicated — same
-    // logic as cinema/games, see BookCardMappers.toCardData.
     val availableGenres: List<String> = remember(allItems) {
         allItems.asSequence()
             .flatMap { it.genres?.split(",")?.map(String::trim).orEmpty() }
@@ -53,7 +52,7 @@ fun BooksSeeAllScreen(
             .toList()
     }
     var selectedGenre by remember { mutableStateOf<String?>(null) }
-    var sortField by remember { mutableStateOf<SortField?>(null) }
+    var sortField by remember { mutableStateOf<SortField?>(SortField.ADDED_DATE) }
     var sortDirection by remember { mutableStateOf(SortDirection.DESC) }
 
     val filteredItems: List<BookCardData> = remember(allItems, selectedGenre, sortField, sortDirection) {
@@ -64,12 +63,13 @@ fun BooksSeeAllScreen(
                 item.genres?.split(",")?.map(String::trim)?.contains(selectedGenre) == true
             }
         }
+        val descending = sortDirection == SortDirection.DESC
         when (sortField) {
             null -> filtered
-            SortField.RATING -> filtered.sortedWith(compareBy(nullsFirst()) { it.rating })
-            SortField.RELEASE_DATE -> filtered.sortedWith(compareBy(nullsFirst()) { it.releaseDate })
-            SortField.ADDED_DATE -> filtered.sortedWith(compareBy(nullsFirst()) { it.addedAt })
-        }.let { sorted -> if (sortDirection == SortDirection.DESC) sorted.reversed() else sorted }
+            SortField.RATING -> sortWithUnknownLast(filtered, descending, { it.title }) { it.rating }
+            SortField.RELEASE_DATE -> sortWithUnknownLast(filtered, descending, { it.title }) { it.releaseDate }
+            SortField.ADDED_DATE -> sortWithUnknownLast(filtered, descending, { it.title }) { it.addedAt }
+        }
     }
 
     var loadedCount by remember(filteredItems) { mutableIntStateOf(minOf(PAGE_SIZE, filteredItems.size)) }
@@ -96,7 +96,8 @@ fun BooksSeeAllScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
         }
     ) { padding ->

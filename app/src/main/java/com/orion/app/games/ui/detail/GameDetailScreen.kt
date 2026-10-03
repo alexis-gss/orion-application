@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,16 +13,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,8 +37,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.orion.app.core.ui.components.ActionButtons
 import com.orion.app.core.ui.components.DetailHeader
@@ -61,6 +66,7 @@ import com.orion.app.games.ui.detail.components.TimeToBeatSection
 import com.orion.app.games.ui.detail.components.franchiseTabContent
 import com.orion.app.games.ui.detail.components.gameRecommendationsSection
 import com.orion.app.games.ui.detail.components.relatedContentTabContent
+import com.orion.app.games.ui.detail.components.rememberRelatedContentLabels
 import kotlinx.coroutines.launch
 
 /**
@@ -240,9 +246,9 @@ private fun PlatformChip(platform: IgdbPlatform) {
     Row(
         modifier = Modifier
             .height(40.dp)
-            .clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(10.dp))
             .background(extended.cardSurface)
-            .border(1.dp, extended.cardBorder, androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+            .border(1.dp, extended.cardBorder, RoundedCornerShape(10.dp))
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -250,14 +256,14 @@ private fun PlatformChip(platform: IgdbPlatform) {
             com.orion.app.core.ui.components.PosterImage(
                 model = platform.logoUrl,
                 contentDescription = platform.name,
-                contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier.height(20.dp).width(28.dp)
             )
         } else {
             Text(
                 text = platform.abbreviation ?: platform.name,
                 style = MaterialTheme.typography.labelMedium,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                fontWeight = FontWeight.Medium
             )
         }
     }
@@ -287,13 +293,11 @@ private fun GameDetailContent(
         if (game.hasRelatedContent) add(relatedTab)
         if (hasFranchiseTab) add(franchiseTab)
     }
-    // Index of the "Related content"/"Same franchise" tab within gameTabs, computed
-    // dynamically since both are optional and independent from each other.
     val relatedTabIndex = if (game.hasRelatedContent) gameTabs.indexOf(relatedTab) else -1
     val franchiseTabIndex = if (hasFranchiseTab) gameTabs.indexOf(franchiseTab) else -1
     var selectedTabIndex by remember(game.id) { mutableIntStateOf(0) }
-    val similarGamesTitle = stringResource(R.string.game_similar_title)
-    val relatedContentLabels = com.orion.app.games.ui.detail.components.rememberRelatedContentLabels()
+    val similarGamesTitle = stringResource(R.string.recommendations_title)
+    val relatedContentLabels = rememberRelatedContentLabels()
 
     var galleryViewerImages by remember { mutableStateOf<List<String>>(emptyList()) }
     var galleryViewerIndex by remember { mutableIntStateOf(0) }
@@ -333,8 +337,6 @@ private fun GameDetailContent(
         ).joinToString(" · ")
     }
 
-    // A game not yet released cannot be marked "completed" or "favorite" — only
-    // following it (to be notified on release) makes sense at this stage.
     val isGameReleased = remember(game.id) {
         game.firstReleaseDate?.let { it * 1000 < System.currentTimeMillis() } ?: false
     }
@@ -347,8 +349,6 @@ private fun GameDetailContent(
         isTimeToBeatLoading = false
     }
 
-    // Play button: opens the first YouTube video from the media, like the trailer
-    // button on the cinema side.
     val context = LocalContext.current
     val onTrailerAction: (() -> Unit)? = game.videos.firstOrNull()?.youtubeUrl?.let { url ->
         { context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))) }
@@ -357,15 +357,14 @@ private fun GameDetailContent(
     LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
         item {
             DetailHeader(
-                // Artworks removed: the banner now uses the first screenshot, more
-                // representative of the actual game than promotional key art.
                 backdropPath = game.screenshots.firstOrNull()?.fullUrl,
                 posterPath = game.coverUrl,
                 title = game.name,
                 tagline = null,
                 voteAverage = igdbRatingTo10(game.displayRating),
                 infoLine = infoLine.ifBlank { null },
-                genres = game.genres.map { it.name }
+                genres = game.genres.map { it.name },
+                posterFallback = { com.orion.app.games.ui.components.GameCoverPlaceholder() },
             )
         }
 
@@ -387,13 +386,29 @@ private fun GameDetailContent(
         }
 
         item {
-            TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.fillMaxWidth()) {
-                gameTabs.forEachIndexed { index, tabLabel ->
-                    Tab(
-                        selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index },
-                        text = { Text(text = tabLabel) }
-                    )
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val minTabWidth = maxWidth / gameTabs.size
+
+                ScrollableTabRow(
+                    selectedTabIndex = selectedTabIndex,
+                    modifier = Modifier.fillMaxWidth(),
+                    edgePadding = 0.dp,
+                ) {
+                    gameTabs.forEachIndexed { index, tabLabel ->
+                        Tab(
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index },
+                            modifier = Modifier.widthIn(min = minTabWidth),
+                            text = {
+                                Text(
+                                    text = tabLabel,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Visible,
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -458,6 +473,7 @@ private fun GameDetailContent(
                 item {
                     GameMediaTabContent(
                         videos = game.videos,
+                        localizedCovers = game.localizedCoverUrls,
                         screenshots = game.screenshots.mapNotNull { it.fullUrl },
                         onImageClick = { images, index ->
                             galleryViewerImages = images

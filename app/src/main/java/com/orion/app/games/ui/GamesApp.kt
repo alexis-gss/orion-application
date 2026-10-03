@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -203,7 +204,7 @@ private fun GamesMainScaffold(repository: GamesRepository, credentialsStore: Igd
 @Composable
 private fun GamesFloatingNavBar(
     tabs: List<GameTab>,
-    currentDestination: androidx.navigation.NavDestination?,
+    currentDestination: NavDestination?,
     onTabSelected: (GameTab) -> Unit,
 ) {
     val extended = OrionColors.colors
@@ -255,7 +256,7 @@ private fun RowScope.GamesPillNavItem(tab: GameTab, selected: Boolean, onClick: 
             .weight(weight)
             .height(50.dp)
             .clip(shape)
-            .background(if (selected) extended.navBarSelectedContainer else androidx.compose.ui.graphics.Color.Transparent)
+            .background(if (selected) extended.navBarSelectedContainer else Color.Transparent)
             .then(
                 if (selected) Modifier.background(
                     Brush.horizontalGradient(

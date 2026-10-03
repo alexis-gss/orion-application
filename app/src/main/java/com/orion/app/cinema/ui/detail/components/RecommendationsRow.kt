@@ -17,7 +17,7 @@ fun LazyListScope.recommendationsSection(
     onSelectMedia: (String, Int) -> Unit,
     title: String
 ) {
-    val items = recommendations.map { item ->
+    val items = recommendations.take(15).map { item ->
         CinemaCardData(
             key = "${item.resolvedMediaType}_${item.id}",
             tmdbId = item.id,

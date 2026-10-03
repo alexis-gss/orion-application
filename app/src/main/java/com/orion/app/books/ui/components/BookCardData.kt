@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.orion.app.core.ui.components.PosterImage
+import com.orion.app.core.ui.components.SectionTitle
 import com.orion.app.core.ui.theme.OrionColors
 import com.orion.app.core.ui.theme.colorForRating
 import java.util.Locale
@@ -266,15 +267,15 @@ fun LazyListScope.seriesTabContent(
         }
         return
     }
+    item { Spacer(modifier = Modifier.height(16.dp)) }
     items(items, key = { it.key }) { data ->
-        Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+        Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 16.dp)) {
             BookItemRow(
                 item = data,
                 onClick = { onItemClick(data) },
             )
         }
     }
-    item { Spacer(modifier = Modifier.height(8.dp)) }
 }
 
 fun LazyListScope.bookRowSection(
@@ -285,7 +286,7 @@ fun LazyListScope.bookRowSection(
     trailingContent: (@Composable (BookCardData) -> Unit)? = null,
     onSeeAllClick: (() -> Unit)? = null,
 ) {
-    item { com.orion.app.core.ui.components.SectionTitle(title = title, onSeeAllClick = onSeeAllClick) }
+    item { SectionTitle(title = title, onSeeAllClick = onSeeAllClick) }
     if (items.isEmpty()) {
         item { EmptyBookSectionHint(emptyLabel) }
     } else {
@@ -309,18 +310,19 @@ fun LazyListScope.bookCarouselSection(
     sectionHorizontalPadding: Dp = 4.dp,
 ) {
     item {
-        com.orion.app.core.ui.components.SectionTitle(
+        SectionTitle(
             title = title,
             modifier = Modifier.padding(horizontal = sectionHorizontalPadding),
             onSeeAllClick = onSeeAllClick,
         )
     }
-    if (items.isEmpty()) {
+    val visibleItems = items.take(15)
+    if (visibleItems.isEmpty()) {
         item { EmptyBookSectionHint(emptyLabel, modifier = Modifier.padding(horizontal = sectionHorizontalPadding)) }
     } else {
         item {
             BookCarouselRow(
-                items = items,
+                items = visibleItems,
                 onItemClick = onItemClick,
                 coverSize = coverSize,
                 contentPadding = PaddingValues(horizontal = sectionHorizontalPadding)

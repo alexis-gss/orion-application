@@ -31,7 +31,7 @@ fun SynopsisSection(
 
     if (cleanTagline == null && cleanOverview == null) return
 
-    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp)) {
         SectionTitle(title = stringResource(R.string.synopsis_title))
 
         cleanTagline?.let {

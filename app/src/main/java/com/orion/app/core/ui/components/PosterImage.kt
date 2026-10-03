@@ -68,6 +68,5 @@ fun PosterImage(
     }
 }
 
-// small helper to avoid an extra androidx.compose.ui.unit.dp import everywhere
 private fun Int.dp() = Dp(this.toFloat())
 private fun Double.dp() = Dp(this.toFloat())

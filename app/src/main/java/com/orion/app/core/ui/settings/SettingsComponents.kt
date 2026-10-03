@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +24,49 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.orion.app.core.ui.theme.OrionColors
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.orion.app.R
+import com.orion.app.core.data.ApiQuotaTracker
+
+/**
+ * "Requests today" counter for one domain's API (TMDB / IGDB / Hardcover), shown at the
+ * top of that domain's Settings tab. Backed by [ApiQuotaTracker], which only counts
+ * requests that actually reached the network (cache hits don't count), so this reflects
+ * real quota consumption rather than every screen visit.
+ */
+@Composable
+fun SettingsApiQuotaSection(domain: String) {
+    val context = LocalContext.current
+    val counts by ApiQuotaTracker.countsFlow(context).collectAsState()
+    val count = counts[domain] ?: 0
+    val extended = OrionColors.colors
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(extended.cardSurface)
+            .border(1.dp, extended.cardBorder, RoundedCornerShape(14.dp))
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            stringResource(R.string.settings_api_quota_label),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            stringResource(R.string.settings_api_quota_value, count),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+        )
+    }
+}
+
 
 /** Toggle (switch) row with an icon + title + optional description, inside a card. */
 @Composable

@@ -113,7 +113,6 @@ fun CinemaSearchScreen(repository: CinemaRepository, onOpenItem: (String, Int) -
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // --- Zone fixe (ne scrolle pas) ---
             TextField(
                 value = query,
                 onValueChange = { query = it },
@@ -161,7 +160,6 @@ fun CinemaSearchScreen(repository: CinemaRepository, onOpenItem: (String, Int) -
                 )
             }
 
-            // --- Zone scrollable ---
             Box(modifier = Modifier.weight(1f)) {
                 when {
                     query.isBlank() -> {
@@ -186,7 +184,7 @@ fun CinemaSearchScreen(repository: CinemaRepository, onOpenItem: (String, Int) -
                                 ) { index, popularItem ->
                                     Row(
                                         Modifier.padding(
-                                            bottom = if (index == popularItems.take(POPULAR_LIMIT).lastIndex) 0.dp else 12.dp
+                                            bottom = if (index == popularItems.take(POPULAR_LIMIT).lastIndex) 0.dp else 16.dp
                                         )
                                     ) {
                                         CinemaItemRow(

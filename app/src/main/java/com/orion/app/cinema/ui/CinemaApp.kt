@@ -73,8 +73,6 @@ private sealed class Tab(val route: String, @StringRes val label: Int, val icon:
 
 private val tabs = listOf(Tab.Planning, Tab.Bookmark, Tab.Search, Tab.Account)
 
-// Page transition fade duration, reused as-is by the floating nav bar so its
-// appearance/disappearance stays visually synchronized.
 private const val PAGE_FADE_DURATION_MS = 300
 
 private const val DETAIL_ROUTE = "cinema_detail/{mediaType}/{tmdbId}"
@@ -132,7 +130,7 @@ private fun MainScaffold(
         NavHost(
             navController = navController,
             startDestination = Tab.Planning.route,
-            modifier = Modifier.fillMaxSize(), // no more innerPadding: full screen
+            modifier = Modifier.fillMaxSize(),
             enterTransition = { fadeIn(animationSpec = tween(PAGE_FADE_DURATION_MS)) },
             exitTransition = { fadeOut(animationSpec = tween(PAGE_FADE_DURATION_MS)) },
             popEnterTransition = { fadeIn(animationSpec = tween(PAGE_FADE_DURATION_MS)) },
@@ -256,7 +254,7 @@ private fun FloatingGlassNavBar(
                 .border(1.dp, extended.navBarBorder, RoundedCornerShape(33.dp))
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             tabs.forEach { tab ->
                 val selected = currentDestination?.hierarchy?.any { it.route == tab.route } == true

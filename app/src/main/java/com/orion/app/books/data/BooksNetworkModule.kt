@@ -140,6 +140,9 @@ object BooksNetworkModule {
                 ConcurrencyLimitInterceptor(),
                 RetryInterceptor(),
             ),
+            networkInterceptors = listOf(
+                com.orion.app.core.data.ApiQuotaTracker.interceptorFor(context, com.orion.app.core.data.ApiQuotaTracker.DOMAIN_BOOKS),
+            ),
         )
         return retrofit.create(HardcoverApi::class.java)
     }

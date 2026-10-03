@@ -158,6 +158,8 @@
     <string name="action_trailer_description">Trailer</string>
     <string name="action_preview_description">Preview</string>
 
+    <string name="settings_api_quota_label">Requests made today</string>
+    <string name="settings_api_quota_value">%1$d</string>
     <string name="recommendations_title">Recommendations</string>
     <string name="streaming_available_title">Available on</string>
 
@@ -255,12 +257,14 @@ Complete games to see your stats appear.</string>
     <string name="game_info_title">Info</string>
     <string name="game_publisher_label">Publisher</string>
     <string name="game_engine_label">Engine</string>
+    <string name="game_artworks_title">Artworks</string>
+    <string name="game_localized_covers_title">Localized covers</string>
     <string name="game_screenshots_title">Screenshots</string>
     <string name="game_time_to_beat_title">Time to beat</string>
     <string name="game_time_to_beat_fast">Fast</string>
     <string name="game_time_to_beat_normal">Normal</string>
     <string name="game_time_to_beat_complete">Complete</string>
-    <string name="game_related_content_title">Related content</string>
+    <string name="game_related_content_title">Expansions</string>
     <string name="game_franchise_tab">Same franchise</string>
     <string name="game_franchise_empty">No other game found for this franchise.</string>
     <string name="game_related_content_none">No related content available.</string>
@@ -334,6 +338,7 @@ Finish books to see your stats appear.</string>
     <string name="settings_books_export_success">Export successful (%1$d read, %2$d followed, %3$d favorites)</string>
     <string name="settings_books_import_success">Import successful (%1$d read, %2$d followed, %3$d favorites)</string>
     <string name="delete_action">Delete</string>
+    <string name="settings_general_tab">Global</string>
     <string name="domain_cinema">Cinema</string>
     <string name="domain_games">Video games</string>
     <string name="domain_books">Books</string>

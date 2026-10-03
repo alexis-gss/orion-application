@@ -1,5 +1,6 @@
 package com.orion.app.games.data
 
+import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 
@@ -47,7 +48,7 @@ class GamesRepository(
 
     // ----- Search -----
     suspend fun search(query: String): List<IgdbGame> {
-        val escaped = query.replace("\"", "\\\"")
+        val escaped = query.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ")
         return api.searchGames(
             IgdbApi.apicalypse(
                 """
@@ -112,10 +113,12 @@ class GamesRepository(
                rating,total_rating,genres.name,platforms.name,platforms.abbreviation,
                involved_companies.company.name,involved_companies.developer,
                involved_companies.publisher,release_dates.date,release_dates.human,
-               release_dates.platform,screenshots.url,videos.name,
+               release_dates.platform,screenshots.url,artworks.url,videos.name,
                videos.video_id,similar_games,game_modes.name,game_engines.name,
                dlcs,expansions,bundles,standalone_expansions,parent_game,version_parent,
-               remakes,remasters,franchises.name,collections.name;
+               remakes,remasters,franchises.name,collections.name,
+               game_localizations.cover.url,game_localizations.region.name,
+               game_localizations.region.identifier;
         where id = $id;
         limit 1;
         """
@@ -272,10 +275,12 @@ class GamesRepository(
     )
 
     suspend fun importSnapshot(bundle: GamesExportBundle, replaceExisting: Boolean) {
-        if (replaceExisting) clearAllData()
-        db.followedGameDao().upsertAll(bundle.followed)
-        db.playedGameDao().insertAll(bundle.played)
-        db.favoriteGameDao().upsertAll(bundle.favorites)
+        db.withTransaction {
+            if (replaceExisting) clearAllData()
+            db.followedGameDao().upsertAll(bundle.followed)
+            db.playedGameDao().insertAll(bundle.played)
+            db.favoriteGameDao().upsertAll(bundle.favorites)
+        }
     }
 
     suspend fun clearAllData() {

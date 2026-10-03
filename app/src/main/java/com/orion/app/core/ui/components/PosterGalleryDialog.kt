@@ -124,13 +124,18 @@ fun PosterGalleryDialog(
         DisposableEffect(Unit) {
             val window = (view.parent as? DialogWindowProvider)?.window
             if (window != null) {
+                window.setWindowAnimations(0)
                 WindowCompat.setDecorFitsSystemWindows(window, false)
                 val controller = WindowInsetsControllerCompat(window, window.decorView)
                 controller.hide(WindowInsetsCompat.Type.systemBars())
                 controller.systemBarsBehavior =
                     WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                // Fond de fenêtre semi-transparent (au lieu d'un noir opaque).
                 window.setBackgroundDrawable(ColorDrawable(android.graphics.Color.argb(230, 0, 0, 0)))
+                window.setGravity(android.view.Gravity.CENTER)
+                window.setLayout(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT
+                )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     window.attributes = window.attributes.apply {
                         layoutInDisplayCutoutMode =
@@ -198,13 +203,20 @@ fun PosterGalleryDialog(
 
         AnimatedVisibility(
             visible = visible,
-            enter = fadeIn(tween(200)) + scaleIn(tween(220), initialScale = 0.85f),
-            exit = fadeOut(tween(200)) + scaleOut(tween(200), targetScale = 0.85f)
+            enter = fadeIn(tween(200)) + scaleIn(
+                animationSpec = tween(220),
+                initialScale = 0.85f,
+                transformOrigin = androidx.compose.ui.graphics.TransformOrigin.Center
+            ),
+            exit = fadeOut(tween(200)) + scaleOut(
+                animationSpec = tween(200),
+                targetScale = 0.85f,
+                transformOrigin = androidx.compose.ui.graphics.TransformOrigin.Center
+            )
         ) {
             Box(
                 Modifier
                     .fillMaxSize()
-                    // Fond semi-transparent au lieu d'un noir opaque.
                     .background(Color.Black.copy(alpha = 0.9f))
             ) {
                 HorizontalPager(
@@ -465,13 +477,16 @@ private fun GalleryBottomBar(
         }
 
         if (posters.size > 4) {
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(20.dp))
             LazyRow(
                 state = listState,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.Bottom,
                 contentPadding = PaddingValues(horizontal = 16.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .padding(top = 6.dp)
             ) {
                 itemsIndexed(posters) { index, url ->
                     val selected = index == currentPage

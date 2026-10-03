@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Encrypted prefs are bound to the device's Keystore: restoring them elsewhere makes them unreadable. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="orion_settings_secure.xml" />
+        <exclude domain="sharedpref" path="orion_books_settings_secure.xml" />
+        <exclude domain="sharedpref" path="orion_igdb_settings_secure.xml" />
+        <exclude domain="sharedpref" path="orion_igdb_token_secure.xml" />
+        <exclude domain="sharedpref" path="__androidx_security_crypto_encrypted_prefs__.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="orion_settings_secure.xml" />
+        <exclude domain="sharedpref" path="orion_books_settings_secure.xml" />
+        <exclude domain="sharedpref" path="orion_igdb_settings_secure.xml" />
+        <exclude domain="sharedpref" path="orion_igdb_token_secure.xml" />
+        <exclude domain="sharedpref" path="__androidx_security_crypto_encrypted_prefs__.xml" />
+    </device-transfer>
+</data-extraction-rules>

@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -70,6 +71,33 @@ private val CoverShape = RoundedCornerShape(12.dp)
 private val DefaultRowCoverSize: Pair<Dp, Dp> = 64.dp to 92.dp
 private val DefaultCarouselCoverSize: Pair<Dp, Dp> = 130.dp to 192.dp
 
+/**
+ * Placeholder cover shown when IGDB provides no cover, or when the image fails to load —
+ * same gradient + icon pattern as BookCoverPlaceholder on the books side, so a game without
+ * artwork doesn't look like a loading bug.
+ */
+@Composable
+fun GameCoverPlaceholder(modifier: Modifier = Modifier) {
+    val extended = OrionColors.colors
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(extended.navBarSelectedContainerAlt, extended.navBarSelectedContainer)
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Filled.SportsEsports,
+            contentDescription = null,
+            tint = extended.badgeText.copy(alpha = 0.85f),
+            modifier = Modifier.size(32.dp)
+        )
+    }
+}
+
 @Composable
 fun GameCover(
     coverUrl: String?,
@@ -81,6 +109,7 @@ fun GameCover(
         contentDescription = contentDescription,
         contentScale = ContentScale.Crop,
         modifier = modifier,
+        fallback = { GameCoverPlaceholder() },
     )
 }
 
@@ -253,12 +282,13 @@ fun LazyListScope.gameCarouselSection(
             onSeeAllClick = onSeeAllClick,
         )
     }
-    if (items.isEmpty()) {
+    val visibleItems = items.take(15)
+    if (visibleItems.isEmpty()) {
         item { EmptyGameSectionHint(emptyLabel, modifier = Modifier.padding(horizontal = sectionHorizontalPadding)) }
     } else {
         item {
             GameCarouselRow(
-                items = items,
+                items = visibleItems,
                 onItemClick = onItemClick,
                 coverSize = coverSize,
                 contentPadding = PaddingValues(horizontal = sectionHorizontalPadding)

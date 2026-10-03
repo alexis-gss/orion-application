@@ -47,6 +47,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.orion.app.R
+import com.orion.app.core.data.ApiQuotaTracker
 import com.orion.app.core.data.IgdbCredentialsStore
 import com.orion.app.core.ui.components.SectionTitle
 import com.orion.app.games.data.GamesExportImportManager
@@ -62,6 +63,8 @@ fun LazyListScope.gamesSettingsTab(
     item {
         SectionTitle(stringResource(R.string.settings_igdb_section_title))
         IgdbCredentialsSection(repository = repository, credentialsStore = credentialsStore)
+        Spacer(Modifier.height(8.dp))
+        SettingsApiQuotaSection(domain = ApiQuotaTracker.DOMAIN_GAMES)
 
         Spacer(Modifier.height(8.dp))
         SectionTitle(stringResource(R.string.settings_games_data_section_title))

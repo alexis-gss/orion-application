@@ -75,11 +75,6 @@ fun ActionButtons(
         val itemSpacingPx = itemSpacing.roundToPx()
         val edgeSpacingPx = edgeSpacing.roundToPx()
 
-        // --- Step 1: measure each CHIP individually (natural, unweighted width) ---
-        // Order matches the visual order in ActionButtonsRow: Follow, Watched?, Favorite?
-        // FollowChip/WatchedChip/FavoriteChip are RowScope extensions (they call
-        // Modifier.weight()), so this slot list must be built and invoked from inside an
-        // actual Row — a bare subcompose lambda has no RowScope receiver on its own.
         val chipSlots = buildList<@Composable RowScope.() -> Unit> {
             add {
                 FollowChip(
@@ -120,10 +115,6 @@ fun ActionButtons(
             }
         }
 
-        // Each chip is subcomposed as its OWN single-child Row so every measured
-        // Placeable's width is exactly that one chip's natural (unweighted) width,
-        // with no interference between chips and no leftover Row padding/arrangement
-        // affecting the measurement.
         val chipNaturalWidths = chipSlots.mapIndexed { index, slot ->
             subcompose("chip_$index") {
                 Row { slot() }
@@ -132,7 +123,6 @@ fun ActionButtons(
 
         val chipCount = chipNaturalWidths.size
 
-        // --- Step 2: measure the round trailing buttons (trailer/extra), not weighted ---
         val roundButtonSlots = buildList<@Composable () -> Unit> {
             onTrailerAction?.let { action -> add { TrailerButton(action) } }
             onExtraAction?.let { action -> add { ExtraButton(action) } }
@@ -141,7 +131,6 @@ fun ActionButtons(
             roundButtonSlots.forEach { it() }
         }.sumOf { it.measure(looseConstraints).width }
 
-        // --- Step 3: total spacing (edge + edge + spacedBy between every visible item) ---
         val totalItemCount = chipCount + roundButtonSlots.size
         val spacingTotal = edgeSpacingPx * 2 +
                 (if (totalItemCount > 1) itemSpacingPx * (totalItemCount - 1) else 0)
@@ -151,12 +140,8 @@ fun ActionButtons(
         val equalShare = if (chipCount > 0) availableForChips / chipCount else 0
         val maxChipNaturalWidth = chipNaturalWidths.maxOrNull() ?: 0
 
-        // THE FIX: only use equal-weight full-width mode if the WIDEST chip's natural
-        // width still fits within the equal share it would receive. Comparing the sum
-        // instead (as before) can pass while still starving the widest chip.
         val fits = chipCount == 0 || maxChipNaturalWidth <= equalShare
 
-        // --- Step 4: final layout pass ---
         val placeable = subcompose("final") {
             ActionButtonsRow(
                 minChipWidth = minChipWidth,
@@ -213,58 +198,57 @@ private fun ActionButtonsRow(
     Row(
         modifier = Modifier
             .let { if (matchWidth) it.fillMaxWidth() else it }
-            .let { if (scrollable) it.horizontalScroll(rememberScrollState()) else it },
+            .let { if (scrollable) it.horizontalScroll(rememberScrollState()) else it }
+            .padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Spacer(Modifier.width(8.dp))
-
-        FollowChip(
-            isFollowed = isFollowed,
-            followDisabled = followDisabled,
-            onFollowToggle = onFollowToggle,
-            followLabel = followLabel,
-            followedLabel = followedLabel,
-            minChipWidth = minChipWidth,
-            useWeight = useWeight,
-        )
-
-        if (isWatched != null && onWatchedToggle != null) {
-            WatchedChip(
-                isWatched = isWatched,
-                watchedDisabled = watchedDisabled,
-                onWatchedToggle = onWatchedToggle,
-                watchedLabel = watchedLabel,
-                notWatchedLabel = notWatchedLabel,
+        Row(
+            modifier = Modifier
+                .let { if (useWeight) it.weight(1f) else it }
+                .padding(start = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            FollowChip(
+                isFollowed = isFollowed,
+                followDisabled = followDisabled,
+                onFollowToggle = onFollowToggle,
+                followLabel = followLabel,
+                followedLabel = followedLabel,
                 minChipWidth = minChipWidth,
                 useWeight = useWeight,
             )
-        }
 
-        if (onFavoriteToggle != null) {
-            FavoriteChip(
-                isFavorite = isFavorite,
-                onFavoriteToggle = onFavoriteToggle,
-                favoriteDisabled = favoriteDisabled,
-                favoriteLabel = favoriteLabel,
-                favoritesLabel = favoritesLabel,
-                minChipWidth = minChipWidth,
-                useWeight = useWeight,
-            )
+            if (isWatched != null && onWatchedToggle != null) {
+                WatchedChip(
+                    isWatched = isWatched,
+                    watchedDisabled = watchedDisabled,
+                    onWatchedToggle = onWatchedToggle,
+                    watchedLabel = watchedLabel,
+                    notWatchedLabel = notWatchedLabel,
+                    minChipWidth = minChipWidth,
+                    useWeight = useWeight,
+                )
+            }
+
+            if (onFavoriteToggle != null) {
+                FavoriteChip(
+                    isFavorite = isFavorite,
+                    onFavoriteToggle = onFavoriteToggle,
+                    favoriteDisabled = favoriteDisabled,
+                    favoriteLabel = favoriteLabel,
+                    favoritesLabel = favoritesLabel,
+                    minChipWidth = minChipWidth,
+                    useWeight = useWeight,
+                )
+            }
         }
 
         onTrailerAction?.let { action -> TrailerButton(action) }
         onExtraAction?.let { action -> ExtraButton(action) }
-
-        Spacer(Modifier.width(8.dp))
     }
 }
-
-// ---------------------------------------------------------------------------------------
-// Individual pieces, extracted so they can be measured in isolation (see step 1 above)
-// as well as reused inside the real row (step 4), guaranteeing both passes render the
-// exact same content and therefore the exact same natural widths.
-// ---------------------------------------------------------------------------------------
 
 @Composable
 private fun RowScope.FollowChip(
@@ -397,6 +381,7 @@ private fun TrailerButton(action: () -> Unit) {
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
         ),
+        modifier = Modifier.padding(end = 8.dp)
     ) {
         Icon(
             imageVector = Icons.Default.PlayArrow,

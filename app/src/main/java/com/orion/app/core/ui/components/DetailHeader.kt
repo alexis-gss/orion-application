@@ -78,7 +78,6 @@ fun DetailHeader(
                 .fillMaxWidth()
                 .height(260.dp)
         ) {
-            // Tall banner (Backdrop)
             PosterImage(
                 model = backdropPath?.toFullImageUrl("w780"),
                 contentDescription = null,
@@ -88,7 +87,6 @@ fun DetailHeader(
                     .height(190.dp)
             )
 
-            // Gradient background to fade the banner into the screen's background
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -104,10 +102,6 @@ fun DetailHeader(
                     )
             )
 
-            // Books domain (no Hardcover banner): without an image behind it,
-            // FloatingTopBar's white back arrow (see core/ui/components) can become
-            // unreadable on a light background. A dark scrim is added at the top,
-            // independent from the background gradient above, which only fades downward.
             if (backdropPath == null) {
                 Box(
                     modifier = Modifier
@@ -121,7 +115,6 @@ fun DetailHeader(
                 )
             }
 
-            // Poster overlapping the banner
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -174,7 +167,6 @@ fun DetailHeader(
             }
         }
 
-        // Quick-info row: TMDB/IGDB/Hardcover rating + year / runtime / seasons...
         if (voteAverage != null || infoLine != null) {
             FlowRow(
                 modifier = Modifier
@@ -193,9 +185,6 @@ fun DetailHeader(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            // Locale.US forced: a decimal point ("7.5") is always wanted, not
-                            // a comma (lint: DefaultLocale — the separator otherwise depends on
-                            // the device's locale and can break the expected format).
                             text = String.format(Locale.US, "%.1f", voteAverage) + "/10",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold
@@ -219,7 +208,6 @@ fun DetailHeader(
             }
         }
 
-        // Genres
         if (genres.isNotEmpty()) {
             Row(
                 modifier = Modifier

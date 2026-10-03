@@ -23,6 +23,7 @@ import com.orion.app.core.worker.ReleaseNotificationWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
@@ -67,15 +68,10 @@ class OrionApplication : Application() {
         // --- Cinema ---
         apiKeyStore = ApiKeyStore.getInstance(this)
         val db = AppDatabase.getInstance(this)
-        // The API key isn't fixed at compile time: the network interceptor re-reads it on
-        // every call, which lets it be changed on the fly from the Settings screen without
-        // restarting the app.
         val api = NetworkModule.provideApi(this, apiKeyStore = apiKeyStore)
         repository = CinemaRepository(api, db)
 
         // --- Video games ---
-        // Database, credentials, and token entirely separate from cinema: the two domains
-        // share no state, only the infrastructure (theme, generic networking).
         igdbCredentialsStore = IgdbCredentialsStore.getInstance(this)
         val igdbTokenStore = IgdbTokenStore.getInstance(this)
         val gamesDb = GamesDatabase.getInstance(this)
@@ -83,27 +79,25 @@ class OrionApplication : Application() {
         gamesRepository = GamesRepository(igdbApi, gamesDb)
 
         // --- Books ---
-        // Same isolation principle: dedicated database and key, no state shared with cinema
-        // or games. Hardcover only needs a single personal token (no OAuth flow to renew
-        // like IGDB), so there is no equivalent to IgdbTokenStore here.
         booksApiKeyStore = BooksApiKeyStore.getInstance(this)
         val booksDb = BooksDatabase.getInstance(this)
         val booksApi = BooksNetworkModule.provideApi(this, apiKeyStore = booksApiKeyStore)
-        booksRepository = BooksRepository(booksApi, booksDb)
+        booksRepository = BooksRepository(booksApi, booksDb, com.orion.app.books.data.FrenchReleaseResolver())
 
         schedulePeriodicRefresh()
 
         // --- Release notifications ---
         notificationPreferenceStore = NotificationPreferenceStore(this, appScope)
-        scheduleReleaseNotifications()
-        // The store reads its values from DataStore asynchronously (see its init{} block):
-        // we observe its change signal to (re)schedule as soon as the user enables/disables
-        // the feature or changes the time from Settings, including the very first load once
-        // the persisted values have been read.
         appScope.launch {
-            notificationPreferenceStore.onChanged.collect {
-                scheduleReleaseNotifications()
-            }
+            // Wait for the persisted preferences: reading them too early used to see
+            // "disabled" and cancel the daily notification work on every process start.
+            notificationPreferenceStore.awaitLoaded()
+            // On startup keep any existing schedule (KEEP) instead of resetting it.
+            scheduleReleaseNotifications(replaceExisting = false)
+            // Then reschedule (REPLACE) only on real changes made by the user.
+            notificationPreferenceStore.onChanged
+                .drop(1) // skip the initial value replayed by the StateFlow
+                .collect { scheduleReleaseNotifications(replaceExisting = true) }
         }
     }
 
@@ -111,11 +105,11 @@ class OrionApplication : Application() {
      * (Re)schedules the release-notification worker to run once a day, as close as possible
      * to the time chosen by the user. WorkManager doesn't guarantee an exact time (system
      * constraints, Doze mode...) but setInitialDelay aligns the first run with the right hour,
-     * after which the 24h interval keeps it there. ExistingPeriodicWorkPolicy.REPLACE (unlike
-     * the other refresh jobs, which use KEEP) is required here: this job must be reschedulable
-     * to a new time on every preference change, not scheduled only once.
+     * after which the 24h interval keeps it there. REPLACE (unlike the other refresh
+     * jobs, which use KEEP) is required when the user changes the preferences so the job moves
+     * to the new time; at app startup [replaceExisting] is false so an existing job is untouched.
      */
-    fun scheduleReleaseNotifications() {
+    fun scheduleReleaseNotifications(replaceExisting: Boolean) {
         if (!notificationPreferenceStore.isEnabled.value) {
             WorkManager.getInstance(this).cancelUniqueWork("release_notifications")
             return
@@ -128,7 +122,7 @@ class OrionApplication : Application() {
             .build()
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             "release_notifications",
-            ExistingPeriodicWorkPolicy.REPLACE,
+            if (replaceExisting) ExistingPeriodicWorkPolicy.REPLACE else ExistingPeriodicWorkPolicy.KEEP,
             request
         )
     }

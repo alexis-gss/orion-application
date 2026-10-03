@@ -39,8 +39,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import com.orion.app.R
 
-// Tab labels are resolved in the Composable via stringResource (see below).
-
 @Composable
 fun TvDetailContent(
     repository: CinemaRepository,
@@ -70,7 +68,7 @@ fun TvDetailContent(
     }
 
     var galleryViewerImages by remember { mutableStateOf<List<GalleryImage>>(emptyList()) }
-    var galleryViewerIndex by remember { mutableIntStateOf(0) } // avoids autoboxing (lint: AutoboxingStateCreation)
+    var galleryViewerIndex by remember { mutableIntStateOf(0) }
     if (galleryViewerImages.isNotEmpty()) {
         PosterGalleryDialog(
             posters = galleryViewerImages.map { it.fullQualityUrl },
@@ -84,8 +82,6 @@ fun TvDetailContent(
         watchedEpisodes.filter { it.tmdbId == tvShow.id && it.mediaType == "tv" }
     }
 
-    // ActionButtons (shared component, see core/ui/components) no longer knows about
-    // VideoItem: the YouTube-opening lambda is built here instead of passing it the video object.
     val context = LocalContext.current
     val trailer = remember(tvShow.id) {
         tvShow.videos?.results?.firstOrNull { it.site == "YouTube" && it.type == "Trailer" }
@@ -99,9 +95,6 @@ fun TvDetailContent(
         }
     }
 
-    // A not-yet-released show (no episode aired yet) cannot be marked favorite: a
-    // "favorite" shouldn't apply to content that was never actually watchable. Following
-    // stays always possible (that's exactly the intended use for an upcoming release).
     val isShowReleased = remember(tvShow.id) { DateUtils.isReleased(tvShow.firstAirDate) }
 
     val statusLabel = when (tvShow.status) {
@@ -114,8 +107,6 @@ fun TvDetailContent(
         else -> tvShow.status
     }
 
-    // pluralStringResource cannot be called inside remember's lambda (DisallowComposableCalls),
-    // so it's resolved here, in the Composable's body, before memoizing the final concatenation.
     val seasonsLabel = tvShow.numberOfSeasons?.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.seasons_count, it, it) }
     val episodesLabel = tvShow.numberOfEpisodes?.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.episodes_count, it, it) }
     val infoLine = remember(tvShow.id, statusLabel, seasonsLabel, episodesLabel) {
@@ -196,8 +187,6 @@ fun TvDetailContent(
                         crew = tvShow.credits?.crew.orEmpty()
                     )
                 }
-                // US region: matches this app's English/US-focused content (see the
-                // language and TMDB "en-US" query defaults elsewhere in the codebase).
                 val providers = tvShow.watchProviders?.results?.get("US")?.flatrate.orEmpty()
                 if (providers.isNotEmpty()) {
                     item {

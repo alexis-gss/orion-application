@@ -1,6 +1,7 @@
 package com.orion.app.core.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,7 +29,7 @@ fun SectionTitle(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 4.dp, vertical = 10.dp),
-        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(

@@ -53,13 +53,7 @@ fun RootApp(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
-    // Domaine réellement en cours de consultation (cinéma/jeux/livres). Contrairement à
-    // `currentRoute`, qui vaut aussi ROUTE_OPTIONS ou ROUTE_HOME (routes sans domaine
-    // propre), cette valeur n'est mise à jour QUE sur une route de domaine — elle
-    // "survit" donc à la navigation vers l'écran Options, pour que le thème et
-    // l'onglet présélectionné dans les settings restent cohérents avec le domaine dont
-    // on vient, plutôt que de retomber systématiquement sur Cinéma.
-    var lastUniverse by remember { mutableStateOf(AppUniverse.CINEMA) }
+    var lastUniverse by remember { mutableStateOf<AppUniverse?>(null) }
     LaunchedEffect(currentRoute) {
         when (currentRoute) {
             ROUTE_CINEMA -> lastUniverse = AppUniverse.CINEMA
@@ -71,7 +65,7 @@ fun RootApp(
     themeUniverseState.value = when (lastUniverse) {
         AppUniverse.GAMES -> ThemeUniverse.GAMES
         AppUniverse.BOOKS -> ThemeUniverse.BOOKS
-        AppUniverse.CINEMA -> ThemeUniverse.CINEMA
+        AppUniverse.CINEMA, null -> ThemeUniverse.CINEMA
     }
 
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -83,7 +77,7 @@ fun RootApp(
         AppUniverse.BOOKS -> ROUTE_BOOKS
     }
 
-    fun currentUniverse(): AppUniverse = lastUniverse
+    fun currentUniverse(): AppUniverse = lastUniverse ?: AppUniverse.CINEMA
 
     fun navigateToUniverse(universe: AppUniverse) {
         val route = routeFor(universe)
@@ -95,7 +89,7 @@ fun RootApp(
 
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = currentRoute == ROUTE_CINEMA || currentRoute == ROUTE_GAMES || currentRoute == ROUTE_BOOKS,
+        gesturesEnabled = currentRoute == ROUTE_CINEMA || currentRoute == ROUTE_GAMES || currentRoute == ROUTE_BOOKS || currentRoute == ROUTE_OPTIONS,
         drawerContent = {
             AppSidebarContent(
                 currentUniverse = currentUniverse(),
@@ -103,6 +97,12 @@ fun RootApp(
                 onOpenOptions = {
                     scope.launch { drawerState.close() }
                     navController.navigate(ROUTE_OPTIONS)
+                },
+                onGoHome = {
+                    scope.launch { drawerState.close() }
+                    if (currentRoute != ROUTE_HOME) {
+                        navController.navigate(ROUTE_HOME) { popUpTo(ROUTE_HOME) { inclusive = true } }
+                    }
                 }
             )
         }
@@ -133,7 +133,7 @@ fun RootApp(
                     booksRepository = app.booksRepository,
                     booksApiKeyStore = app.booksApiKeyStore,
                     notificationPreferenceStore = app.notificationPreferenceStore,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
                 )
             }
             composable(ROUTE_CINEMA) {

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,6 +48,7 @@ import com.orion.app.core.ui.theme.OrionColors
 import com.orion.app.games.data.IgdbGame
 import com.orion.app.games.data.IgdbVideo
 import com.orion.app.games.ui.components.GameCardData
+import com.orion.app.games.ui.components.GameItemRow
 import com.orion.app.games.ui.components.gameCarouselSection
 import com.orion.app.games.ui.components.toCardData
 
@@ -102,14 +104,14 @@ fun GameInfoSection(game: IgdbGame) {
 
 /**
  * "Media" tab on the games side, same order and visual language as MediaTabContent on the
- * cinema side: trailers first (YouTube thumbnail + play button), then screenshots.
- * Artworks (IGDB promotional key art) are no longer shown here: the first screenshot now
- * serves as the banner (see DetailHeader in GameDetailScreen), and the rest of the
- * artworks added little compared to actual screenshots.
+ * cinema side: trailers first (YouTube thumbnail + play button), then IGDB's "Localized
+ * covers" (region-specific box art, shown only when present — replaces artworks/promotional
+ * key art, no longer shown here), then screenshots.
  */
 @Composable
 fun GameMediaTabContent(
     videos: List<IgdbVideo>,
+    localizedCovers: List<String>,
     screenshots: List<String>,
     onImageClick: (images: List<String>, index: Int) -> Unit
 ) {
@@ -117,7 +119,7 @@ fun GameMediaTabContent(
     val extended = OrionColors.colors
 
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-        if (videos.isEmpty() && screenshots.isEmpty()) {
+        if (videos.isEmpty() && localizedCovers.isEmpty() && screenshots.isEmpty()) {
             Text(
                 text = stringResource(R.string.media_none_available),
                 style = MaterialTheme.typography.bodyMedium,
@@ -172,6 +174,34 @@ fun GameMediaTabContent(
                                     .padding(6.dp)
                             )
                         }
+                    }
+                }
+            }
+        }
+
+        if (localizedCovers.isNotEmpty()) {
+            SectionTitle(
+                title = stringResource(R.string.game_localized_covers_title),
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                itemsIndexed(localizedCovers) { index, url ->
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .width(130.dp)
+                            .height(190.dp)
+                            .clickable { onImageClick(localizedCovers, index) }
+                    ) {
+                        PosterImage(
+                            model = url,
+                            contentDescription = null,
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                            modifier = Modifier.fillMaxWidth().height(190.dp)
+                        )
                     }
                 }
             }
@@ -272,9 +302,6 @@ fun LazyListScope.relatedContentTabContent(
     remasters: List<IgdbGame>,
     remakes: List<IgdbGame>,
     onSelectGame: (Int) -> Unit,
-    // Titles pre-resolved by the caller (composable context): this function is a
-    // LazyListScope extension, not a @Composable, so it cannot call stringResource() itself
-    // outside an item { } block.
     labels: RelatedContentLabels,
 ) {
     if (expansions.isEmpty() && remasters.isEmpty() && remakes.isEmpty()) {
@@ -289,13 +316,12 @@ fun LazyListScope.relatedContentTabContent(
     }
 
     if (expansions.isNotEmpty()) {
-        gameCarouselSection(
-            title = labels.expansions,
-            items = expansions.map { it.toCardData() },
-            emptyLabel = "",
-            onItemClick = { onSelectGame(it.igdbId) },
-            sectionHorizontalPadding = 16.dp,
-        )
+        item {
+            ExpansionsGrid(
+                expansions = expansions.map { it.toCardData() },
+                onSelectGame = { onSelectGame(it) }
+            )
+        }
         item { Spacer(modifier = Modifier.height(8.dp)) }
     }
     if (remasters.isNotEmpty()) {
@@ -317,6 +343,44 @@ fun LazyListScope.relatedContentTabContent(
             sectionHorizontalPadding = 16.dp,
         )
         item { Spacer(modifier = Modifier.height(8.dp)) }
+    }
+}
+
+/**
+ * Static 3-per-row grid of expansion posters (not a LazyVerticalGrid: this sits inside a
+ * single `item {}` of the outer LazyColumn, so a nested lazy grid would conflict with it —
+ * built instead from plain chunked Rows, same poster style/aspect ratio as SeeAllScreen's grid).
+ */
+@Composable
+private fun ExpansionsGrid(expansions: List<GameCardData>, onSelectGame: (Int) -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        expansions.chunked(3).forEach { row ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                row.forEach { item ->
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .aspectRatio(2f / 3f)
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { onSelectGame(item.igdbId) }
+                    ) {
+                        com.orion.app.games.ui.components.GameCover(
+                            coverUrl = item.coverUrl,
+                            contentDescription = item.title,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+                // Pad the last, incomplete row so its tiles keep the same width as full rows.
+                repeat(3 - row.size) { Spacer(modifier = Modifier.weight(1f)) }
+            }
+        }
     }
 }
 
@@ -357,15 +421,15 @@ fun LazyListScope.franchiseTabContent(
         }
         return
     }
+    item { Spacer(modifier = Modifier.height(16.dp)) }
     items(games.map { it.toCardData() }, key = { it.key }) { data ->
-        Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
-            com.orion.app.games.ui.components.GameItemRow(
+        Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 16.dp)) {
+            GameItemRow(
                 item = data,
                 onClick = { onSelectGame(data.igdbId) }
             )
         }
     }
-    item { Spacer(modifier = Modifier.height(8.dp)) }
 }
 
 fun LazyListScope.gameRecommendationsSection(
@@ -373,7 +437,7 @@ fun LazyListScope.gameRecommendationsSection(
     onSelectGame: (Int) -> Unit,
     title: String
 ) {
-    val items: List<GameCardData> = recommendations.map { it.toCardData() }
+    val items: List<GameCardData> = recommendations.take(15).map { it.toCardData() }
     gameCarouselSection(
         title = title,
         items = items,

@@ -29,6 +29,7 @@ import com.orion.app.core.ui.theme.OrionColors
 import com.orion.app.core.util.DateUtils
 import java.util.Calendar
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,9 +68,6 @@ fun CinemaAccountScreen(
             .map { it.toWatchedMovieCardData(context, DateUtils.formatShortDate(it.watchedAt)) }
     }
 
-    // Summary of a watched show: one row per show (not one per episode), with the
-    // number of episodes checked off. The grouping stays here since it's specific to this
-    // screen; only the result (MediaCardData) is shared with the rest of the app.
     val tv = remember(watched) {
         watched.filter { it.mediaType == "tv" }
             .groupBy { it.tmdbId }
@@ -85,9 +83,6 @@ fun CinemaAccountScreen(
                     posterPath = latest.posterPath,
                     subtitle = context.resources.getQuantityString(R.plurals.episodes_watched_count_short, episodesWatched, episodesWatched),
                     trailingText = DateUtils.formatShortDate(latest.watchedAt),
-                    // Was missing here (unlike toWatchedMovieCardData/toFavoriteCardData),
-                    // hence an empty genre picker in "See all" for watched shows even
-                    // though WatchedItem.genres was properly set at write time.
                     genres = latest.genres
                 )
             }
@@ -112,7 +107,7 @@ fun CinemaAccountScreen(
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
                         stringResource(R.string.account_no_items),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        textAlign = TextAlign.Center,
                     )
                 }
             } else {
@@ -170,10 +165,6 @@ fun CinemaAccountScreen(
         }
     }
 }
-
-// ---------------- Statistics (specific to this screen) ----------------
-// Purely derived from the list already observed in memory (watched_items):
-// no network call or extra query, just filtering/counting.
 
 private data class StatItem(val value: Int, val label: String, val accent: Boolean = false)
 

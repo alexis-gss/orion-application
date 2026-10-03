@@ -104,9 +104,6 @@ fun MediaTabContent(
                                     .align(Alignment.Center)
                                     .size(40.dp)
                                     .background(
-                                        // Same gradient as the "date" badges (Account) and
-                                        // "episodes remaining" badges (Bookmark), radial for
-                                        // a clean circular halo behind the play button.
                                         Brush.radialGradient(
                                             listOf(
                                                 extended.navBarSelectedContainerAlt,

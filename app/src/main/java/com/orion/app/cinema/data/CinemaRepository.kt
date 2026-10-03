@@ -1,5 +1,6 @@
 package com.orion.app.cinema.data
 
+import androidx.room.withTransaction
 import com.orion.app.core.data.GzipJsonExportImport
 import com.orion.app.core.util.DateUtils
 import kotlinx.coroutines.flow.Flow
@@ -35,7 +36,11 @@ class CinemaRepository(
 
     // Tests a specific key without persisting it beforehand
     suspend fun testApiKey(keyToTest: String) {
-        api.testApiKeyDirect(keyToTest)
+        if (com.orion.app.core.data.NetworkModule.looksLikeV4Token(keyToTest)) {
+            api.testBearerDirect("Bearer $keyToTest")
+        } else {
+            api.testApiKeyDirect(keyToTest)
+        }
     }
 
     suspend fun testApiKey() {
@@ -101,10 +106,20 @@ class CinemaRepository(
             val detail = api.getTvDetail(item.tmdbId)
             val next = detail.nextEpisodeToAir
             val last = detail.lastEpisodeToAir
-            val airedEpisodes = if (last?.seasonNumber != null && last.episodeNumber != null) {
+            // TMDB doesn't always flip "next" -> "last" the moment an episode airs (it can lag
+            // by a few hours), so an episode that just released today can still show up as
+            // "next" here. Treat it as aired too in that case, otherwise the Bookmark badge
+            // stays stuck at "0 ep. remaining" (no badge) instead of showing "1 ep. remaining"
+            // right when it drops.
+            val effectiveLast = if (next?.seasonNumber != null && next.episodeNumber != null && DateUtils.isWatchable(next.airDate)) {
+                next
+            } else {
+                last
+            }
+            val airedEpisodes = if (effectiveLast?.seasonNumber != null && effectiveLast.episodeNumber != null) {
                 detail.seasons
-                    .filter { it.seasonNumber in 1 until last.seasonNumber }
-                    .sumOf { it.episodeCount } + last.episodeNumber
+                    .filter { it.seasonNumber in 1 until effectiveLast.seasonNumber }
+                    .sumOf { it.episodeCount } + effectiveLast.episodeNumber
             } else {
                 detail.seasons
                     .filter { DateUtils.isReleased(it.airDate) || DateUtils.isWatchable(it.airDate) }
@@ -118,8 +133,8 @@ class CinemaRepository(
                     nextSeasonNumber = next?.seasonNumber,
                     nextEpisodeNumber = next?.episodeNumber,
                     status = detail.status,
-                    lastAiredSeasonNumber = last?.seasonNumber,
-                    lastAiredEpisodeNumber = last?.episodeNumber,
+                    lastAiredSeasonNumber = effectiveLast?.seasonNumber,
+                    lastAiredEpisodeNumber = effectiveLast?.episodeNumber,
                     airedEpisodesCount = airedEpisodes.takeIf { it > 0 },
                     lastCheckedAt = now,
                     genres = detail.genres.toGenresCsv(),
@@ -256,12 +271,14 @@ class CinemaRepository(
      * Restores a previously exported snapshot, optionally wiping existing local data first.
      */
     suspend fun importSnapshot(bundle: CinemaExportBundle, replaceExisting: Boolean) {
-        if (replaceExisting) {
-            clearAllData()
+        db.withTransaction {
+            if (replaceExisting) {
+                clearAllData()
+            }
+            db.followedItemDao().upsertAll(bundle.followed)
+            db.watchedItemDao().insertAll(bundle.watched)
+            db.favoriteItemDao().upsertAll(bundle.favorites)
         }
-        db.followedItemDao().upsertAll(bundle.followed)
-        db.watchedItemDao().insertAll(bundle.watched)
-        db.favoriteItemDao().upsertAll(bundle.favorites)
     }
 
     suspend fun clearAllData() {

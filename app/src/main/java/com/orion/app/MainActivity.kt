@@ -26,8 +26,6 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val themeStore = remember { ThemePreferenceStore(applicationContext, lifecycleScope) }
             val isDarkTheme by themeStore.isDarkTheme.collectAsState()
-            // Updated by RootApp based on the active route: yellow gradient for cinema,
-            // Twitch-style purple gradient for video games.
             val themeUniverseState = remember { mutableStateOf(ThemeUniverse.CINEMA) }
 
             OrionTheme(darkTheme = isDarkTheme, universe = themeUniverseState.value) {

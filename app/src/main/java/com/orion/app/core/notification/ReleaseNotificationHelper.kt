@@ -63,8 +63,6 @@ object ReleaseNotificationHelper {
         val total = movieCount + episodeCount + gameCount + bookCount
         if (total <= 0) return
 
-        // On Android 13+ (API 33), POST_NOTIFICATIONS is a runtime permission: bail out
-        // early if it hasn't been granted instead of building a notification we can't post.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED
@@ -111,9 +109,6 @@ object ReleaseNotificationHelper {
             .setContentIntent(pendingIntent)
             .build()
 
-        // The permission check above already guards this on API 33+; the catch is a
-        // defensive fallback (e.g. OEM quirks or the permission being revoked mid-call)
-        // so the background worker never crashes over a missed notification.
         try {
             NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
         } catch (e: SecurityException) {

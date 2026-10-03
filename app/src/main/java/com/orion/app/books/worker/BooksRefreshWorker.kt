@@ -30,15 +30,7 @@ class BooksRefreshWorker(context: Context, params: WorkerParameters) : Coroutine
         }
 
         snapshot.forEachIndexed { index, item ->
-            // Each book is isolated in its own try/catch: a one-off failure (DB or network,
-            // the latter already swallowed by getBookDetail) must not fail the whole batch
-            // and force WorkManager to retry books that were already processed.
             try {
-                // Default staleAfterMillis (not 0L): this worker already runs at most once
-                // every 24h (see schedulePeriodicRefresh), so forcing a refresh every time
-                // here would be redundant, and on a close re-run (restart, waking from
-                // extended sleep, WorkManager retry) would needlessly redo calls for books
-                // that were checked recently.
                 repo.refreshFollowedIfStale(item)
             } catch (e: Exception) {
                 // Move on to the next book rather than abandoning the whole batch.

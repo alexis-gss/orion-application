@@ -59,8 +59,6 @@ fun BooksGateScreen(repository: BooksRepository, apiKeyStore: BooksApiKeyStore) 
         isChecking = true
         scope.launch {
             try {
-                // Tested BEFORE persisting, same as IGDB: avoids letting an invalid token
-                // through the gate anyway (credentials != null as soon as save() runs).
                 repository.testApiKey(trimmed)
                 apiKeyStore.save(trimmed)
             } catch (e: Exception) {

@@ -139,7 +139,13 @@ data class HardcoverEditionRaw(
     val subtitle: String? = null,
     val image: HardcoverImage? = null,
     val book: HardcoverBookRaw? = null,
+    @SerialName("isbn_13") val isbn13: String? = null,
+    @SerialName("isbn_10") val isbn10: String? = null,
+    val language: HardcoverLanguage? = null,
 )
+
+@Serializable
+data class HardcoverLanguage(val code2: String? = null)
 
 @Serializable
 data class HardcoverSeriesRaw(
@@ -176,6 +182,9 @@ data class HardcoverBook(
      *  already in the past. Null if no French edition is known yet, or its release date
      *  isn't known yet. */
     val frenchReleaseTimestamp: Long? = null,
+    /** Year-only French publication hint (e.g. from BnF) when the exact day is unknown.
+     *  Proves a book is out if the year is before the current one, never gives a date. */
+    val frenchReleaseYear: Int? = null,
     val year: String?,
     val seriesId: String?,
     val seriesName: String?,
@@ -187,13 +196,16 @@ data class HardcoverBook(
     // Used only to pick the "main" record among several Hardcover `book` entries sharing
     // the same series position (foreign-language/special editions) — see getSeriesBooks.
     val usersCount: Int? = null,
+    // ISBN of the targeted edition (the French one when available, see BOOK_FIELDS/
+    // toHardcoverBook) — shown in the Info section, same row style as the game engine/
+    // publisher rows on the games side.
+    val isbn13: String? = null,
+    val isbn10: String? = null,
 ) {
     val authorsLabel: String? get() = authors.takeIf { it.isNotEmpty() }?.joinToString(", ")
     val primaryCategory: String? get() = categories.firstOrNull()
     val genreLabel: String? get() = categories.firstOrNull()
-    val isbn13: String? get() = null
-    val isbn10: String? get() = null
-    val hasIsbn: Boolean get() = false
+    val hasIsbn: Boolean get() = isbn13 != null || isbn10 != null
 
     /** Public Hardcover link for the book, used for the "View on Hardcover" action — far
      *  more reliable than the old Google Books webReaderLink (often missing or expired). */
@@ -213,8 +225,19 @@ data class HardcoverBook(
      * make an untranslated book (e.g. a volume released in Japan but not yet in France)
      * appear "released".
      */
-    val isReleasedInFrance: Boolean get() =
-        hasFrenchEdition && frenchReleaseTimestamp?.let { it <= System.currentTimeMillis() / 1000 } == true
+    val isReleasedInFrance: Boolean get() {
+        frenchReleaseTimestamp?.let { return it <= System.currentTimeMillis() / 1000 }
+        // No exact day: a French publication year strictly before the current year is
+        // enough to be sure the book is out; the current year is ambiguous -> not released.
+        val year = frenchReleaseYear ?: return false
+        val currentYear = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("Europe/Paris"))
+            .get(java.util.Calendar.YEAR)
+        return year < currentYear
+    }
+
+    /** Label for a year-only French date (shown instead of a misleading exact day). */
+    val frenchReleaseLabel: String? get() =
+        frenchReleaseTimestamp?.let { null } ?: frenchReleaseYear?.toString()
 }
 
 /** Minimal container to stay compatible with `book.volumeInfo.subtitle` / `.language` used
@@ -324,6 +347,8 @@ fun HardcoverBookRaw.toHardcoverBook(frenchOverride: HardcoverEditionRaw? = edit
         slug = slug,
         ratingOn5 = rating,
         usersCount = usersCount,
+        isbn13 = frenchOverride?.isbn13,
+        isbn10 = frenchOverride?.isbn10,
         // Subtitle also always in English (generic), to stay consistent with the name —
         // avoids mixing an English name with a French subtitle.
         volumeInfo = HardcoverVolumeInfo(subtitle = subtitle)
